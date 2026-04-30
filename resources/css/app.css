@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+body { background: #0f0d0a; color: #f0e8d8; font-family: 'DM Sans', sans-serif; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #3a3228; border-radius: 4px; }
