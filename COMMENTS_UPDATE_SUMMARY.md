@@ -1,9 +1,3 @@
-# TindaTrack Project - Bisaya-English Comments Update
-
-## Summary of Changes
-
-Successfully updated **58+ source code files** in the TindaTrack inventory management system with comprehensive Bisaya-English comments. The mix creates a natural, beginner-friendly documentation style.
-
 ## Files Updated (By Category)
 
 ### Controllers (10 files)
@@ -64,19 +58,19 @@ Successfully updated **58+ source code files** in the TindaTrack inventory manag
 
 **File Headers:**
 ```php
-// ProductController - nag-manage ng inventory products
-// Nag-handle ng CRUD operations para sa products
+// ProductController - nag-manage sa inventory products
+// Nag-handle nsa CRUD operations para sa products
 ```
 
 **Function Documentation:**
 ```php
-// Ipakita lahat ng active products sa table para sa frontend
-// Kunin lahat ng products na active with relationships
+// Ipakita tanan nga active products sa table para sa frontend
+// Kuhaon tanan nga products na active with relationships
 ```
 
 **Inline Comments:**
 ```php
-// Mag-decrement ng product stock - ito ay nag-reduce ng available inventory
+// Mag-decrement sa product stock -nag-reduce sa available inventory
 Product::where('id', $item['product_id'])
     ->decrement('stock_quantity', $item['quantity']);
 ```
@@ -104,26 +98,3 @@ Product::where('id', $item['product_id'])
 ✅ **Credit Management** - Utang records, partial/full payments
 ✅ **Dashboard Metrics** - Revenue, profit, profit margin calculations
 ✅ **Database Seeders** - Demo data for testing
-
-## Code Quality
-
-- Comments explain **WHY**, not just **WHAT**
-- Beginner-friendly language mix
-- Clear explanation of business logic
-- Documentation of edge cases (e.g., tingi pricing, stock validation)
-- Relationship documentation in Models
-- Validation rules explained
-
-## Files Ready for:
-✅ New developer onboarding
-✅ Team knowledge sharing
-✅ Filipino/Bisaya-speaking developers
-✅ Code review & maintenance
-✅ Learning & training purposes
-
----
-
-**Date Completed:** 2026-04-30  
-**Project:** TindaTrack Inventory Management System  
-**Language:** PHP (Laravel), JavaScript/React (Inertia.js)  
-**Comment Style:** Bisaya + English Mix (Beginner-Friendly)
