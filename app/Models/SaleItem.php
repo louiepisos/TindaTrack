@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 // SaleItem Model - individual line items sa bawat sale
-// Store ang product, quantity, at pricing info para sa each item sa sale
+// Store ang product, quantity, og pricing info para sa each item sa sale
 
 class SaleItem extends Model
 {

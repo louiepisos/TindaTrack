@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 // Utang Model - customer credit/installment records
 // "Utang" = debt/credit sa Filipino
-// Tracks kung magkano ang utang ng customer at kung magkano na ang nabayaran
+// Tracks kung pila ang utang sa customer og kung pila na ang nabayaran
 
 class Utang extends Model
 {
@@ -17,7 +17,7 @@ class Utang extends Model
 
     // Mass assignable attributes
     protected $fillable = [
-        'customer_name',  // Name ng customer
+        'customer_name',  // Name of customer
         'contact_number', // Phone number para sa follow-up
         'total_amount',   // Total amount of credit extended
         'paid_amount',    // Amount already paid
@@ -34,13 +34,13 @@ class Utang extends Model
 
     // ── Relationships ──
 
-    // An utang ay may maraming line items (products)
+    // An utang kay naay daghan line items (products)
     public function items(): HasMany
     {
         return $this->hasMany(UtangItem::class);
     }
 
-    // An utang ay belongs to a user (who recorded it)
+    // An utang kay belongs to a user (who recorded it)
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

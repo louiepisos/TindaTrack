@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Laravel's queue supports a variety of backends via a single, unified
-    | API, giving you convenient access to each backend using identical
+    | API, giving me convenient access to each backend using identical
     | syntax for each. The default queue connection is defined below.
     |
     */
@@ -20,9 +20,9 @@ return [
     | Queue Connections
     |--------------------------------------------------------------------------
     |
-    | Here you may configure the connection options for every queue backend
-    | used by your application. An example configuration is provided for
-    | each backend supported by Laravel. You're also free to add more.
+    | Here i may configure the connection options for every queue backend
+    | used by my application. An example configuration is provided for
+    | each backend supported by Laravel. I'm also free to add more.
     |
     | Drivers: "sync", "database", "beanstalkd", "sqs", "redis",
     |          "deferred", "background", "failover", "null"
@@ -98,7 +98,7 @@ return [
     |
     | The following options configure the database and table that store job
     | batching information. These options can be updated to any database
-    | connection and table which has been defined by your application.
+    | connection and table which has been defined by my application.
     |
     */
 
@@ -112,7 +112,7 @@ return [
     | Failed Queue Jobs
     |--------------------------------------------------------------------------
     |
-    | These options configure the behavior of failed queue job logging so you
+    | These options configure the behavior of failed queue job logging so i
     | can control how and where failed jobs are stored. Laravel ships with
     | support for storing failed jobs in a simple file or in a database.
     |

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class TransactionController extends Controller
 {
     // Placeholder para sa future transaction methods
-    // Pwedeng mag-add ng methods para sa:
+    // Pwedeng mag-add og methods para sa:
     // - View transaction history
     // - Generate transaction reports
     // - Analyze transaction trends

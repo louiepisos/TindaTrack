@@ -4,16 +4,16 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-// DatabaseSeeder - ang main seeder na nag-call ng lahat ng sub-seeders
+// DatabaseSeeder - ang main seeder na nag-call sa tanan nga sub-seeders
 // Ginagamit para i-populate ang database with test/demo data
 
 class DatabaseSeeder extends Seeder
 {
-    // Ang run method ay tina-call ng `php artisan db:seed`
-    // Nag-execute ng lahat ng seeder classes
+    // Ang run method kay gina-call sa `php artisan db:seed`
+    // Nag-execute sa tanan nga seeder classes
     public function run(): void
     {
-        // Mag-call ng seeders in order - order matters kung may dependencies
+        // Mag-call sa seeders in order - order matters kung naay dependencies
         $this->call([
             UserSeeder::class,       // Create users first
             CategorySeeder::class,   // Then categories

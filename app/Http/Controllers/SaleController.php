@@ -10,12 +10,12 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// SaleController - nag-handle ng POS (Point of Sale) transactions
-// Nag-record ng sales, nag-decrement ng stock, at nag-create ng utang records
+// SaleController - ga handle sa POS (Point of Sale) transactions
+// Naga record sa sales, nag-decrement sa stock, og nag-create og utang records
 
 class SaleController extends Controller
 {
-    // Store ang bagong sale transaction
+    // Store ang bag ong sale transaction
     // Pwedeng full payment o installment (utang)
     public function store(Request $request)
     {
@@ -35,23 +35,23 @@ class SaleController extends Controller
         ]);
 
         // ── Stock check BEFORE doing anything ──
-        // Verify na may sapat na stock bago mag-process
+        // Verify nga naay sapat na stock bag o mag-process
         foreach ($request->items as $item) {
             $product = Product::find($item['product_id']);
             if ($product->stock_quantity < $item['quantity']) {
-                // Return error kung walang enough stock
+                // Return error kung walay enough stock
                 return back()->withErrors([
                     'stock' => "Not enough stock for \"{$product->name}\". Only {$product->stock_quantity} left!"
                 ]);
             }
         }
 
-        // Gumamit ng database transaction para sa data consistency
-        // Lahat ng operations here ay mag-rollback if may error
+        // Use sa database transaction para sa data consistency
+        // Tanan nga operations here kay mag-rollback if error
         DB::transaction(function () use ($request) {
             $utangId = null;
 
-            // Kung utang (installment payment), create ang utang record
+            // Kung utang (installment payment), create og utang record
             if ($request->payment_type === 'utang') {
                 // Create utang header record
                 $utang = Utang::create([
@@ -88,7 +88,7 @@ class SaleController extends Controller
                 'utang_id'      => $utangId,  // Link to utang if applicable
             ]);
 
-            // Create sale line items at mag-decrement ng stock
+            // Create sale line items nga mag-decrement sa stock
             foreach ($request->items as $item) {
                 // Create sale item record
                 SaleItem::create([
@@ -100,8 +100,8 @@ class SaleController extends Controller
                     'total_price' => $item['total_price'],
                 ]);
 
-                // Decrement ang product stock
-                // Ito ay nag-reduce ng available inventory
+                // Decrement sa product stock
+                // mao ni ga reduce sa available inventory
                 Product::where('id', $item['product_id'])
                     ->decrement('stock_quantity', $item['quantity']);
             }

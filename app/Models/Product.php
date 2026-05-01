@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 // Product Model - represent ang inventory items/products
-// May pricing info, stock levels, at relationships sa category at supplier
-// Gumagamit ng soft deletes - products ay hindi talaga mabubura kundi marked as deleted
+// naay pricing info, stock levels, og relationships sa category og supplier
+// gamit sa soft deletes - products kay dili jud deleted marked as deleted lang
 
 class Product extends Model
 {
-    // Enable soft delete functionality - products ay marked as deleted, not actually removed
+    // Enable soft delete functionality - products kay marked as deleted, not actually removed
     use SoftDeletes;
 
     // Mass assignable attributes - pwedeng i-set sa create/update
@@ -44,13 +44,13 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // Product ay supplied by a supplier
+    // Product kay supplied by a supplier
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    // Product ay pwedeng may maraming transactions (sales, restocks, adjustments)
+    // Product kay pwedeng daghan transactions (sales, restocks, adjustments)
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
@@ -59,12 +59,12 @@ class Product extends Model
     // ── Computed/Virtual Attributes ──
 
     // Get ang stock status - critical, low, or active
-    // Used para sa UI alerts at inventory management
+    // Used para sa UI alerts og inventory management
     public function getStatusAttribute(): string
     {
-        // Critical: walang stock o very low
+        // Critical: walay stock o very low
         if ($this->stock_quantity <= 0) return 'critical';
-        // Critical: below 50% ng restock threshold
+        // Critical: below 50% ang restock threshold
         if ($this->stock_quantity <= ($this->restock_threshold * 0.5)) return 'critical';
         // Low: below restock threshold
         if ($this->stock_quantity <= $this->restock_threshold) return 'low';
@@ -73,7 +73,7 @@ class Product extends Model
     }
 
     // Get ang units sold in last 30 days
-    // Used para ma-track ang sales velocity ng product
+    // Used para ma-track ang sales velocity sa product
     public function getSoldLast30Attribute(): int
     {
         return $this->transactions()

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
 
-// SuppliersPage - nag-manage ng supplier information
-// Suppliers ay companies na nag-provide ng products sa store
+// SuppliersPage - nag-manage sa supplier information
+// Suppliers kay companies na nag-provide sa products sa store
 
 export default function Suppliers() {
     const { suppliers } = usePage().props
@@ -32,7 +32,7 @@ export default function Suppliers() {
         router.post('/suppliers', form, { onSuccess: () => setShowModal(false) })
     }
 
-    // Delete supplier - may confirmation
+    // Delete supplier -  confirmation
     const destroy = (id, name) => {
         if (confirm(`Delete "${name}"?`)) {
             router.delete(`/suppliers/${id}`)

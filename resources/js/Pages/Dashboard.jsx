@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
 
-// DashboardPage - ang main dashboard pagkatapos mag-login
-// Nag-display ng business metrics at POS (point of sale) system
-// May features para sa:
+// DashboardPage - ang main dashboard pagkahoman mag-login
+// Nag-display sa business metrics og POS (point of sale) system
+// features:
 // - Sales metrics (revenue, profit, low stock alerts)
 // - POS interface para sa quick sales entry
-// - Payment tracking (cash at utang/credit)
+// - Payment tracking (cash og utang/credit)
 
 export default function Dashboard() {
-    // Get data mula sa server - stats, products, current user
+    // Get data sa server - stats, products, current user
     const { stats, recentProducts, auth } = usePage().props
 
     // POS Modal State
@@ -23,9 +23,9 @@ export default function Dashboard() {
     const [changeAmount, setChangeAmount] = useState(0)    // Amount ng change
     const [processing, setProcessing] = useState(false)    // Nag-process ng sale
 
-    // Calculate ang total amount ng sale
+    // Calculate ang total amount sa sale
     const total = items.reduce((sum, i) => sum + i.total_price, 0)
-    // Calculate ang change (kung may overpayment)
+    // Calculate ang change (kung naay overpayment)
     const change = Math.max(0, parseFloat(amountGiven || 0) - total)
 
     // Add item sa POS
@@ -43,17 +43,17 @@ export default function Dashboard() {
         }])
     }
 
-    // Remove item mula sa POS
+    // Remove item sa POS
     const removeItem = (idx) => {
         setItems(items.filter((_, i) => i !== idx))
     }
 
-    // Update item sa POS - nag-handle ng product selection, qty changes, tingi toggle
+    // Update item sa POS - nag-handle sa product selection, qty changes, tingi toggle
     const updateItem = (idx, field, value) => {
         const updated = [...items]
         updated[idx][field] = value
 
-        // Kung nag-change ang product selection, kunin ang product details
+        // Kung nag-change ang product selection, kuhaon ang product details
         if (field === 'product_id') {
             const prod = recentProducts.find(p => p.id == value)
             if (prod) {
@@ -90,7 +90,7 @@ export default function Dashboard() {
         setItems(updated)
     }
 
-    // Tingi calculator - kung magkano ang pieces na pwedeng bilhin sa amount given
+    // Tingi calculator - kung pila ang pieces na pwede paliton sa amount given
     const tingiCalc = (item) => {
         if (!item.tingi_price || item.tingi_price <= 0) return 0
         return Math.floor(parseFloat(amountGiven || 0) / item.tingi_price)
@@ -109,9 +109,9 @@ export default function Dashboard() {
 
     // Submit ang sale to server
     const submitSale = () => {
-        // Validate kung may items
+        // Validate kung naay items
         if (items.length === 0) return alert('Add at least one item!')
-        // Validate kung may sapat na amount given (for cash payment)
+        // Validate kung naay sapat na amount given (for cash payment)
         if (paymentType === 'paid' && (!amountGiven || parseFloat(amountGiven) < total)) {
             return alert('Amount given is less than total!')
         }
@@ -205,7 +205,7 @@ export default function Dashboard() {
                         <h1 style={{ color: '#f0e8d8', fontSize: 26, fontWeight: 800, margin: '0 0 4px' }}>Dashboard 📊</h1>
                         <p style={{ color: '#7a6e60', margin: 0 }}>Welcome back, {auth?.user?.name}!</p>
                     </div>
-                    {/* New Sale Button - mag-open ng POS modal */}
+                    {/* New Sale Button - mag-open sa POS modal */}
                     <button onClick={() => setShowPOS(true)} style={{
                         padding: '12px 28px', borderRadius: 12, border: 'none',
                         background: 'linear-gradient(135deg, #e8a236, #c45c2a)',
@@ -514,7 +514,7 @@ export default function Dashboard() {
             )}
 
             {/* ══════════════════════════════════════════════════════════ */}
-            {/* ── CHANGE MODAL (display change amount pagkatapos ng sale) ── */}
+            {/* ── CHANGE MODAL (display change amount pagkahoman sa sale) ── */}
             {/* ══════════════════════════════════════════════════════════ */}
             {showChange && (
                 <div style={{

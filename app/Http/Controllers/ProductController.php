@@ -9,16 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
-// ProductController - nag-manage ng inventory products
-// Nag-handle ng CRUD operations para sa products
-// May special pricing features tulad ng tingi pricing at pack pricing
+// ProductController - Ga manage sa inventory products
+// Ga handle sa CRUD operations para sa products
+// Naay special pricing features parehas sa tingi pricing og pack pricing
 
 class ProductController extends Controller
 {
-    // Ipakita lahat ng active products sa table para sa frontend
+    // Ga pakita sa tanan active products sa table para sa frontend
     public function index()
     {
-        // Kunin lahat ng products na active with relationships sa category at supplier
+        // Mag get sa tanan products na active with relationships sa category og supplier
         $products = Product::with(['category', 'supplier'])
             ->where('is_active', true)
             ->latest()  // Sort by most recent first
@@ -51,12 +51,12 @@ class ProductController extends Controller
         ]);
     }
 
-    // Mag-add ng bagong product sa database
+    // Mag-add og bag ong product sa database
     public function store(Request $request)
     {
-        // Validate lahat ng required fields bago ma-save
-        // Cost price ay kinailangan para ma-compute ang profit margin
-        // Tingi price ay optional para sa items na pwedeng ibenta ng piece
+        // Validate tanan nga required fields bag o ma-save
+        // Cost price kay kinailangan para ma compute ang profit margin
+        // Tingi price kay optional para sa items na pwede i baligya by piece
         $data = $request->validate([
             'name'              => 'required|string|max:255',
             'sku'               => 'nullable|string|unique:products,sku',
@@ -72,9 +72,9 @@ class ProductController extends Controller
             'unit'              => 'nullable|string|max:30',  // pcs, sachet, box, etc.
         ]);
 
-        // Set default emoji kung walang provided
+        // Set default emoji kung walay provided
         $data['emoji'] = $data['emoji'] ?? '📦';
-        // New products ay automatically active
+        // New productsk kay automatically active
         $data['is_active'] = true;
 
         // Save sa database
@@ -107,7 +107,7 @@ class ProductController extends Controller
     }
 
     // Delete (soft delete) ang product
-    // Ang product ay hindi talaga mabubura, mark lang as deleted
+    // Ang product kay dili jud deleted mark lang as deleted
     public function destroy(Product $product)
     {
         $product->delete();

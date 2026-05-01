@@ -12,7 +12,7 @@ use App\Http\Controllers\UtangController;
 
 // ── PUBLIC ROUTES (walang authentication required) ──
 
-// Root route - mag-redirect sa login
+// Root route - mag redirect sa login
 Route::get('/', fn() => redirect()->route('login'));
 
 // Login form display
@@ -25,7 +25,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // ── PROTECTED ROUTES (requires authentication) ──
 Route::middleware('auth')->group(function () {
 
-    // Dashboard - homepage pagkatapos mag-login
+    // Dashboard - homepage pagkahoman mag-login
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── PRODUCTS ROUTES ──

@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-// Supplier Model - nag-supply ng products
-// Contain ang contact information at location ng supplier
+// Supplier Model - nag-supply sa products
+// Contain ang contact information og location sa supplier
 
 class Supplier extends Model
 {
@@ -27,7 +27,7 @@ class Supplier extends Model
         'is_active' => 'boolean',
     ];
 
-    // A supplier ay may maraming products
+    // A supplier kay daghan products
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

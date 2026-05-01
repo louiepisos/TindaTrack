@@ -6,17 +6,17 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use App\Models\Category;
 
-// CategorySeeder - nag-create ng product categories
-// Categories ay ginagamit para mag-organize ng products sa catalog
+// CategorySeeder - nag-create sa product categories
+// Categories kay ginagamit para mag-organize sa products sa catalog
 
 class CategorySeeder extends Seeder
 {
     public function run(): void
     {
         // Define ang list ng categories para sa sari-sari store
-        // May name, emoji, color, at description para sa bawat category
+        // May name, emoji, color, at description para sa tanan category
         $categories = [
-            // Beverages category - drinks tulad ng juice, coffee, water
+            // Beverages category - drinks like juice, coffee, water
             ['name' => 'Beverages',     'emoji' => '🧃', 'color' => 'blue',   'description' => 'Juice drinks, coffee, softdrinks, and water.'],
             // Snacks - chips, candies, crackers, etc.
             ['name' => 'Snacks',        'emoji' => '🍫', 'color' => 'gold',   'description' => 'Chips, wafers, candies, and crackers.'],
@@ -34,7 +34,7 @@ class CategorySeeder extends Seeder
             ['name' => 'Household',     'emoji' => '🧻', 'color' => 'blue',   'description' => 'Tissue, detergent, and cleaning supplies.'],
         ];
 
-        // Loop through each category at mag-create sa database
+        // Loop through each category and mag-create sa database
         foreach ($categories as $cat) {
             Category::create([
                 'name'        => $cat['name'],

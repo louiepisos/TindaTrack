@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
 
-// ProductsPage - nag-display at nag-manage ng product catalog
+// ProductsPage - naga-display og naga-manage nsa product catalog
 // May features para sa:
-// - List lahat ng products with search at filtering
+// - List tanan nga products with search og filtering
 // - Add, edit, delete products
 // - Pricing calculator with markup suggestion
 // - Tingi pricing (per piece) support
@@ -39,7 +39,7 @@ export default function Products() {
         setShowModal(true)
     }
 
-    // Open edit product modal - kunin ang data ng product
+    // Open edit product modal - kuhaon ang data sa product
     const openEdit = (p) => {
         setEditing(p.id)
         setForm({
@@ -68,7 +68,7 @@ export default function Products() {
         }
     }
 
-    // Delete product - may confirmation dialog
+    // Delete product -  confirmation dialog
     const destroy = (id, name) => {
         if (confirm(`Delete "${name}"?`)) {
             router.delete(`/products/${id}`)
@@ -82,7 +82,7 @@ export default function Products() {
         return { bg: '#1a3d2a', color: '#5aad7f', label: 'In Stock' }
     }
 
-    // Suggest price based sa cost at markup percentage
+    // Suggest price based sa cost og markup percentage
     const suggestPrice = () => {
         if (!form.cost_price || parseFloat(form.cost_price) <= 0) {
             return alert('Enter cost price first')

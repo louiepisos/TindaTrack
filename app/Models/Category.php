@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 // Category Model - grouping para sa products
-// Represent ang product categories tulad ng Beverages, Snacks, Dairy, etc.
+// Represent ang product categories example Beverages, Snacks, Dairy, etc.
 
 class Category extends Model
 {
@@ -25,7 +25,7 @@ class Category extends Model
         'is_active' => 'boolean',
     ];
 
-    // A category ay may maraming products
+    // A category kay daghan products
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

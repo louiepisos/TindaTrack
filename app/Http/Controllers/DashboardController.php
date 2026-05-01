@@ -9,34 +9,34 @@ use App\Models\Supplier;
 use App\Models\Sale;
 use Carbon\Carbon;
 
-// DashboardController - nag-display ng business metrics at overview
-// Nag-compile ng important KPIs para sa business dashboard
+// DashboardController - ga display sa business metrics at overview
+// ga compile sa mga importante nga KPIs (Key Performance Indicator) para sa business dashboard
 
 class DashboardController extends Controller
 {
-    // Ipakita ang dashboard with all stats at recent products
-    // Dito nag-calculate ng:
+    // ga pakita sa dashboard with all stats og recent products
+    // Diri ga calculate ang:
     // - Total products, low stock, categories, suppliers
     // - Revenue (total at today)
     // - Profit margin
     // - Recent products na may active inventory
     public function index()
     {
-        // Count ang total active products
+        // ga count sa total active products
         $totalProducts = Product::count();
-        // Count products na mababa ang stock (less than o equal to 10 units)
+        // ga count sa gamay na ang stock (less than o equal to 10 units)
         $lowStock      = Product::where('stock_quantity', '<=', 10)->count();
-        // Total number ng categories
+        // Total number sa categories
         $categories    = Category::count();
-        // Total number ng suppliers
+        // Total number sa suppliers
         $suppliers     = Supplier::count();
 
-        // Kunin ang total revenue from all sales
+        // ga kuha sa total revenue from all sales
         $totalRevenue = Sale::sum('total_amount');
-        // Calculate ang revenue for today only
+        // ga calculate sa revenue for today only
         $todayRevenue = Sale::whereDate('created_at', Carbon::today())->sum('total_amount');
 
-        // Initialize cost variables - gagamitin para mag-compute ng profit
+        // Initialize cost variables - gagamiton para mag-compute sa profit
         $totalCost = 0;
         $todayCost = 0;
 
@@ -62,8 +62,8 @@ class DashboardController extends Controller
         // Calculate profit margin percentage
         $profitMargin = $totalRevenue > 0 ? round(($totalProfit / $totalRevenue) * 100, 1) : 0;
 
-        // Kunin ang recent products na active at may stock
-        // Nag-sort by updated_at para makita ang recently modified items
+        // Ga kuha sa recent products na active og naay stock
+        // Ga sort by updated_at para makita ang recently modified items
         $recentProducts = Product::with('category')
             ->where('is_active', true)
             ->where('stock_quantity', '>', 0)

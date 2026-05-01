@@ -2,26 +2,26 @@ import { useState } from 'react'
 import { router } from '@inertiajs/react'
 
 // LoginPage Component - ang login form para sa user authentication
-// Nag-display ng login form at nag-handle ng login submission
+// Naga-display sa login form og nag-handle sa login submission
 export default function Login() {
-    // Form state - nag-store ng email, password, at remember preference
+    // Form state - naga-store sa email, password, og remember preference
     const [form, setForm] = useState({ email: '', password: '', remember: false })
-    // Validation errors - nag-store ng error messages mula sa server
+    // Validation errors - naga-store sa error messages gikan sa server
     const [errors, setErrors] = useState({})
-    // Loading state - true habang nag-process ang login
+    // Loading state - true hangtud naga-process ang login
     const [loading, setLoading] = useState(false)
 
-    // Handle input change - update ang form state habang nag-type ang user
+    // Handle input change - update ang form state hantud naga-type ang user
     const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-    // Handle form submission - mag-send ng login request sa backend
+    // Handle form submission - mag-send og login request sa backend
     const submit = () => {
         setLoading(true)
         // Mag-POST sa /login endpoint with credentials
         router.post('/login', form, {
-            // Kung may error sa authentication, mag-set ng errors
+            // Kung naay error sa authentication, mag-set og errors
             onError: (e) => { setErrors(e); setLoading(false) },
-            // Pagkatapos ng request (success o error), stop loading
+            // homan sa request (success o error), stop loading
             onFinish: () => setLoading(false),
         })
     }
@@ -81,7 +81,7 @@ export default function Login() {
                                 color: '#f0e8d8', fontSize: 14, outline: 'none', boxSizing: 'border-box'
                             }}
                         />
-                        {/* Show email error kung may error */}
+                        {/* Show email error kung naay error */}
                         {errors.email && <p style={{ color: '#d9534f', fontSize: 12, margin: '4px 0 0' }}>{errors.email}</p>}
                     </div>
 
@@ -100,7 +100,7 @@ export default function Login() {
                                 color: '#f0e8d8', fontSize: 14, outline: 'none', boxSizing: 'border-box'
                             }}
                         />
-                        {/* Show password error kung may error */}
+                        {/* Show password error kung naay error */}
                         {errors.password && <p style={{ color: '#d9534f', fontSize: 12, margin: '4px 0 0' }}>{errors.password}</p>}
                     </div>
 

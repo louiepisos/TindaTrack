@@ -7,8 +7,8 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Supplier;
 
-// ProductSeeder - nag-create ng demo/test products
-// Typical products na makikita sa sari-sari store
+// ProductSeeder - naga create og demo/test products
+// Typical products nga makikita sa sari-sari store
 
 class ProductSeeder extends Seeder
 {
@@ -269,9 +269,9 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        // Loop through each product at mag-create sa database
+        // Loop through each product og mag-create sa database
         foreach ($products as $product) {
-            // Merge array with is_active = true para sa lahat ng products
+            // Merge array with is_active = true para sa tanan nga products
             Product::create(array_merge($product, ['is_active' => true]));
         }
     }

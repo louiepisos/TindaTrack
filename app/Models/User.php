@@ -10,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 // User Model - represent ang app users
-// May authentication capabilities at notifications
+// naay authentication capabilities og notifications
 // Attributes na fillable (pwedeng i-mass assign):
 // - name: user's display name
 // - email: unique email address
@@ -25,7 +25,7 @@ class User extends Authenticatable
 
     /**
      * Get ang attributes na dapat i-cast sa specific types.
-     * Ito ay nag-ensure na ang data ay may correct type bago gamitin
+     * ga ensure na ang data kay naay correct type bag o gamitin
      *
      * @return array<string, string>
      */

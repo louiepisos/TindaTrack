@@ -1,4 +1,4 @@
-// Import ang bootstrap configuration - nag-setup ng axios at HTTP headers
+// Import ang bootstrap configuration - nag-setup sa axios and HTTP headers
 import './bootstrap'
 // Import ang global CSS styles
 import '../css/app.css'
@@ -10,11 +10,11 @@ import { createInertiaApp } from '@inertiajs/react'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 
 // Initialize ang Inertia.js app
-// Ito ay nag-create ng single-page application na seamlessly integrated sa Laravel
+// nag-create og single-page application na seamlessly integrated sa Laravel
 createInertiaApp({
-    // Customize ang browser title - mag-add ng app name
+    // Customize ang browser title - mag-add sa app name
     title: (title) => `${title} — TindaTrack`,
-    // Dynamically mag-load ng React page components
+    // Dynamically mag-load sa React page components
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,  // Load from Pages directory

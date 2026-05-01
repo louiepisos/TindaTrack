@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 // Sale Model - represent ang sales transactions
 // Store ang sale header information - total amount, payment type, etc.
-// Individual items ay stored sa SaleItem model
+// Individual items kay stored sa SaleItem model
 
 class Sale extends Model
 {
@@ -31,19 +31,19 @@ class Sale extends Model
 
     // ── Relationships ──
 
-    // A sale ay may maraming line items
+    // A sale kay daghan line items
     public function items(): HasMany
     {
         return $this->hasMany(SaleItem::class);
     }
 
-    // A sale ay belongs to a user (salesperson)
+    // A sale kay belongs to a user (salesperson)
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // A sale ay linked to utang record (if credit sale)
+    // A sale kay linked to utang record (if credit sale)
     public function utang(): BelongsTo
     {
         return $this->belongsTo(Utang::class);

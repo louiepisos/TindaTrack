@@ -6,15 +6,15 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-// SupplierController - nag-manage ng supplier information
-// Nag-handle ng CRUD para sa suppliers na nag-provide ng products
+// SupplierController - nag manage sa supplier information
+// Nag handle ng CRUD para sa suppliers na nag provide sa products
 
 class SupplierController extends Controller
 {
-    // Ipakita lahat ng active suppliers
+    // Ipakita tanan nga active suppliers
     public function index()
     {
-        // Kunin lahat ng active suppliers, sorted by most recent
+        // Kuhaon tanan nga active suppliers, sorted by most recent
         $suppliers = Supplier::where('is_active', true)
             ->latest()
             ->get();
@@ -25,7 +25,7 @@ class SupplierController extends Controller
         ]);
     }
 
-    // Mag-add ng bagong supplier
+    // Mag add og bag ong supplier
     public function store(Request $request)
     {
         // Validate ang supplier information

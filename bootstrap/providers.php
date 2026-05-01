@@ -1,11 +1,11 @@
 <?php
 
 // Service providers configuration
-// Dito nag-list ng lahat ng service providers na kailangan ng app
+// Dari naga list sa tanan nga service providers na kinahanglan sa app
 
 use App\Providers\AppServiceProvider;
 
 return [
-    // Mag-load ang AppServiceProvider - nag-register ng app services
+    // Mag-load ang AppServiceProvider - nag-register sa app services
     AppServiceProvider::class,
 ];

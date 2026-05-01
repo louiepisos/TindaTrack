@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
 
-// UtangPage - nag-track ng customer credits/installment payments
+// UtangPage - nag-track sa customer credits/installment payments
 // "Utang" = debt/credit sa Filipino language
-// Shows outstanding balances at payment history
+// Shows outstanding balances og payment history
 
 export default function UtangPage() {
     const { utangs } = usePage().props
@@ -12,7 +12,7 @@ export default function UtangPage() {
     const [search, setSearch] = useState('')            // Search query
     const [filterStatus, setFilterStatus] = useState('all') // Status filter
 
-    // Filter utangs based sa search at status
+    // Filter utangs based sa search og status
     const filtered = utangs.filter(u => {
         const matchSearch = u.customer_name.toLowerCase().includes(search.toLowerCase())
         const matchStatus = filterStatus === 'all' || u.status === filterStatus

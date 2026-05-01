@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 // UtangItem Model - line items sa utang record
-// Store ang individual products na kinuha on credit
+// Store ang individual products na gikuha on credit
 
 class UtangItem extends Model
 {

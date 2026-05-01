@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
-// AuthController - nag-handle ng login at logout operations
-// Ang responsibilities nito ay:
+// AuthController - nag-handle sa login og logout operations
+// Ang responsibilities:
 // 1. Ipakita ang login form
-// 2. Validate at mag-authenticate ng credentials
-// 3. Mag-logout at i-clear ang session
+// 2. Validate og mag-authenticate sa credentials
+// 3. Mag-logout og i-clear ang session
 
 class AuthController extends Controller
 {
@@ -23,21 +23,21 @@ class AuthController extends Controller
     }
 
     // Handle ang login form submission
-    // Nag-verify ng email at password, then nag-create ng session kung valid
+    // Nag-verify sa email og password, then nag-create og session kung valid
     public function login(Request $request)
     {
-        // Validate ang credentials - email at password ay required fields
+        // Validate ang credentials - email og password kay required fields
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Subukan ang Auth::attempt - kung successful, mag-create ng session
-        // Ang 'remember' flag ay nag-extend ng session duration
+        // tryan ang Auth::attempt - kung successful, mag-create sa session
+        // Ang 'remember' flag kay nag-extend sa session duration
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             // Regenerate ang session ID para sa security (prevent session fixation)
             $request->session()->regenerate();
-            // Mag-redirect sa dashboard o intended page
+            // Mag-redirect sa dashboard or intended page
             return redirect()->intended(route('dashboard'));
         }
 
@@ -47,10 +47,10 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Logout ang user - mag-clear ng lahat ng session data
+    // Logout ang user - mag-clear sa tanan nga session data
     public function logout(Request $request)
     {
-        // Mag-logout ng user from auth facade
+        // Mag-logout sa user from auth facade
         Auth::logout();
         // Invalidate ang current session
         $request->session()->invalidate();

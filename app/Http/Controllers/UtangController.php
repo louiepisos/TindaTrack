@@ -6,16 +6,16 @@ use App\Models\Utang;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-// UtangController - nag-manage ng customer credits/installments
+// UtangController - nag-manage sa customer credits/installments
 // "Utang" = debt/credit in Filipino
 // Tracks customer balances at payment history
 
 class UtangController extends Controller
 {
-    // Ipakita ang lahat ng utang records with customer info at items
+    // Ipakita ang tanan utang records with customer info at items
     public function index()
     {
-        // Kunin lahat ng utang records with items at product details
+        // Kuhaon tanan nga utang records with items at product details
         $utangs = Utang::with('items.product')
             ->orderBy('created_at', 'desc')  // Most recent first
             ->get()
@@ -59,7 +59,7 @@ class UtangController extends Controller
         $status  = $newPaid >= $utang->total_amount ? 'paid' : 'partial';
 
         // Update ang utang record
-        // Limit ang paid amount to total (walang overpayment)
+        // Limit ang paid amount to total (walay overpayment)
         $utang->update([
             'paid_amount' => min($newPaid, $utang->total_amount),
             'status'      => $status,

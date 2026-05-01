@@ -100,7 +100,6 @@ class Product extends Model
     protected $appends = ['status'];
 }
 
-
 <?php
 // ============================================================
 // app/Models/Transaction.php

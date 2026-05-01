@@ -6,8 +6,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
-// UserSeeder - nag-create ng default user accounts
-// Ginagamit para sa development at testing
+// UserSeeder - naga-create sa default user accounts
+// Ginagamit para sa development og testing
 
 class UserSeeder extends Seeder
 {

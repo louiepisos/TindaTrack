@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-// Base controller class - lahat ng ibang controllers ay mag-extend dito
-// Ito ay ang foundation ng lahat ng HTTP request handlers
+// Base controller class - tanan mga lhi nga controllers kay  ga extend diri
+// mao ni ang foundation sa tanan nga HTTP request handlers
 abstract class Controller
 {
-    // May mga global middleware at helper methods na pwedeng gamitin sa lahat ng controllers
+    // naay mga global middleware og helper methods nga pwedeng gamiton sa tanan nga controllers
 }

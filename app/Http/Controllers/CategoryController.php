@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-// CategoryController - nag-handle ng category operations
-// Currently empty pero pwedeng mag-add ng methods para sa:
+// CategoryController - ga-handle sa category operations
+// Currently empty pero pwede mag-add og methods para sa:
 // - Create, read, update, delete categories
 // - List categories
 // - Manage category details
@@ -13,5 +13,5 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     // Placeholder para sa future methods
-    // Karamihan ng category operations ay handled ng ProductController
+    // kasagara nga category operations kay handled na ang ProductController
 }
