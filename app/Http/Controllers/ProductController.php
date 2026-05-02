@@ -73,9 +73,11 @@ class ProductController extends Controller
         ]);
 
         // Set default emoji kung walay provided
-        $data['emoji'] = $data['emoji'] ?? '📦';
+       $data['sku'] = !empty($data['sku']) ? $data['sku'] : 'PRD-' . strtoupper(Str::random(6));
+       $data['emoji'] = $data['emoji'] ?? '📦';
+       $data['is_active'] = true; 
         // New productsk kay automatically active
-        $data['is_active'] = true;
+        
 
         // Save sa database
         Product::create($data);

@@ -1,8 +1,3 @@
-# TindaTrack Project - Bisaya-English Comments Update
-
-## Summary of Changes
-
-Successfully updated **58+ source code files** in the TindaTrack inventory management system with comprehensive Bisaya-English comments. The mix creates a natural, beginner-friendly documentation style.
 
 ## Files Updated (By Category)
 
@@ -105,25 +100,4 @@ Product::where('id', $item['product_id'])
 ✅ **Dashboard Metrics** - Revenue, profit, profit margin calculations
 ✅ **Database Seeders** - Demo data for testing
 
-## Code Quality
 
-- Comments explain **WHY**, not just **WHAT**
-- Beginner-friendly language mix
-- Clear explanation of business logic
-- Documentation of edge cases (e.g., tingi pricing, stock validation)
-- Relationship documentation in Models
-- Validation rules explained
-
-## Files Ready for:
-✅ New developer onboarding
-✅ Team knowledge sharing
-✅ Filipino/Bisaya-speaking developers
-✅ Code review & maintenance
-✅ Learning & training purposes
-
----
-
-**Date Completed:** 2026-04-30  
-**Project:** TindaTrack Inventory Management System  
-**Language:** PHP (Laravel), JavaScript/React (Inertia.js)  
-**Comment Style:** Bisaya + English Mix (Beginner-Friendly)
