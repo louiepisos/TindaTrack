@@ -411,6 +411,87 @@ export default function Products() {
                                 {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                             </select>
                         </div>
+                        {/* ── PRICE SUGGESTION TOOL ── */}
+        {form.cost_price > 0 && (
+            <div style={{
+                marginBottom: 24, padding: 16, borderRadius: 12,
+                background: 'rgba(232,162,54,.06)', border: '1px solid rgba(232,162,54,.2)'
+            }}>
+                <div style={{ color: '#e8a236', fontSize: 13, fontWeight: 700, marginBottom: 12 }}>
+                    💡 Price Suggestion Tool
+                </div>
+
+                {/* Markup slider */}
+                <div style={{ marginBottom: 12 }}>
+                    <label style={{ color: '#7a6e60', fontSize: 11, display: 'block', marginBottom: 6 }}>
+                        Markup % — {form.markup ?? 30}%
+                    </label>
+                    <input
+                        type="range" min="5" max="200" step="5"
+                        value={form.markup ?? 30}
+                        onChange={e => setForm({...form, markup: parseInt(e.target.value)})}
+                        style={{ width: '100%', accentColor: '#e8a236' }}
+                    />
+                </div>
+
+                {/* Suggestions based on selling mode */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {/* Pack suggestion — show if pack or both */}
+                    {(form.selling_mode === 'pack' || form.selling_mode === 'both') && (
+                        <div style={{
+                            padding: '10px 14px', borderRadius: 8,
+                            background: 'rgba(232,162,54,.08)', border: '1px solid rgba(232,162,54,.15)',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <span style={{ color: '#7a6e60', fontSize: 12 }}>
+                                Suggested Pack Price:
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ color: '#e8a236', fontSize: 14, fontWeight: 700 }}>
+                                    ₱{(parseFloat(form.cost_price || 0) * (1 + (form.markup ?? 30) / 100)).toFixed(2)}
+                                </span>
+                                <button onClick={() => setForm({
+                                    ...form,
+                                    unit_price: (parseFloat(form.cost_price || 0) * (1 + (form.markup ?? 30) / 100)).toFixed(2)
+                                })} style={{
+                                    padding: '4px 10px', borderRadius: 6, border: 'none',
+                                    background: '#e8a236', color: '#fff',
+                                    fontSize: 11, fontWeight: 600, cursor: 'pointer'
+                                }}>Apply</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tingi suggestion — show if tingi or both */}
+                    {(form.selling_mode === 'tingi' || form.selling_mode === 'both') && form.stock_quantity > 0 && (
+                        <div style={{
+                            padding: '10px 14px', borderRadius: 8,
+                            background: 'rgba(90,173,127,.08)', border: '1px solid rgba(90,173,127,.15)',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}>
+                            <span style={{ color: '#7a6e60', fontSize: 12 }}>
+                                Suggested Tingi Price: <span style={{ color: '#4a4238' }}>
+                                    (cost ÷ {form.stock_quantity} pcs × markup)
+                                </span>
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ color: '#5aad7f', fontSize: 14, fontWeight: 700 }}>
+                                    ₱{(parseFloat(form.cost_price || 0) / parseFloat(form.stock_quantity || 1) * (1 + (form.markup ?? 30) / 100)).toFixed(2)}
+                                </span>
+                                <button onClick={() => setForm({
+                                    ...form,
+                                    tingi_price: (parseFloat(form.cost_price || 0) / parseFloat(form.stock_quantity || 1) * (1 + (form.markup ?? 30) / 100)).toFixed(2)
+                                })} style={{
+                                    padding: '4px 10px', borderRadius: 6, border: 'none',
+                                    background: '#5aad7f', color: '#fff',
+                                    fontSize: 11, fontWeight: 600, cursor: 'pointer'
+                                }}>Apply</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
 
                         {/* Modal Actions - ang buttons sa modal */}
                         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
