@@ -30,18 +30,19 @@ export default function Dashboard() {
 
     // Add item sa POS
     const addItem = () => {
-        setItems([...items, {
-            product_id: '',
-            product_name: '',
-            emoji: '📦',
-            quantity: 1,
-            is_tingi: false,          // Whole pack by default
-            unit_price: 0,
-            tingi_price: 0,
-            pieces_per_pack: 1,
-            total_price: 0,
-        }])
-    }
+    setItems([...items, {
+        product_id: '',
+        product_name: '',
+        emoji: '📦',
+        quantity: 1,
+        is_tingi: false,
+        unit_price: 0,
+        original_price: 0,
+        tingi_price: 0,
+        pieces_per_pack: 1,
+        total_price: 0,
+    }])
+}
 
     // Remove item sa POS
     const removeItem = (idx) => {
@@ -54,20 +55,20 @@ export default function Dashboard() {
         updated[idx][field] = value
 
         // Kung nag-change ang product selection, kuhaon ang product details
-        if (field === 'product_id') {
-            const prod = recentProducts.find(p => p.id == value)
-            if (prod) {
-                updated[idx].product_name   = prod.name
-                updated[idx].emoji          = prod.emoji
-                updated[idx].tingi_price    = parseFloat(prod.tingi_price || prod.unit_price)
-                updated[idx].pieces_per_pack= prod.pieces_per_pack || 1
-                // Set price based on tingi o whole pack
-                updated[idx].unit_price     = updated[idx].is_tingi
-                    ? parseFloat(prod.tingi_price || prod.unit_price)
-                    : parseFloat(prod.unit_price)
-                updated[idx].total_price    = updated[idx].unit_price * updated[idx].quantity
-            }
-        }
+       if (field === 'product_id') {
+    const prod = recentProducts.find(p => p.id == value)
+    if (prod) {
+        updated[idx].product_name    = prod.name
+        updated[idx].emoji           = prod.emoji
+        updated[idx].tingi_price     = parseFloat(prod.tingi_price || prod.unit_price)
+        updated[idx].pieces_per_pack = prod.pieces_per_pack || 1
+        updated[idx].unit_price      = updated[idx].is_tingi
+            ? parseFloat(prod.tingi_price || prod.unit_price)
+            : parseFloat(prod.unit_price)
+        updated[idx].original_price  = updated[idx].unit_price // save original
+        updated[idx].total_price     = updated[idx].unit_price * updated[idx].quantity
+    }
+}
 
         // Kung nag-toggle ang tingi checkbox
         if (field === 'is_tingi') {
@@ -87,6 +88,11 @@ export default function Dashboard() {
             updated[idx].total_price = updated[idx].unit_price * parseInt(value || 0)
         }
 
+        // Kung nag-manually change ang price (custom price override)
+if (field === 'unit_price') {
+    updated[idx].unit_price  = parseFloat(value || 0)
+    updated[idx].total_price = parseFloat(value || 0) * updated[idx].quantity
+}
         setItems(updated)
     }
 
@@ -389,16 +395,32 @@ export default function Dashboard() {
                                             >{item.is_tingi ? '✅ Tingi' : 'Per Pack'}</button>
                                         </div>
 
-                                        {/* Subtotal Display */}
-                                        <div>
-                                            <label style={s.label}>Subtotal</label>
-                                            <div style={{
-                                                padding: '9px 12px', borderRadius: 8,
-                                                background: '#1a1612', border: '1px solid #2e2820',
-                                                color: '#e8a236', fontSize: 14, fontWeight: 700
-                                            }}>₱{item.total_price.toFixed(2)}</div>
-                                        </div>
-                                    </div>
+                                       {/* Custom Price Override */}
+<div>
+    <label style={s.label}>
+        Price (₱)
+        {item.unit_price !== item.original_price && item.original_price > 0 && (
+            <span style={{ color: '#d9534f', marginLeft: 6, fontSize: 10 }}>
+                ✏️ modified
+            </span>
+        )}
+    </label>
+    <input
+        type="number" min="0" step="0.01"
+        value={item.unit_price}
+        onChange={e => updateItem(idx, 'unit_price', e.target.value)}
+        style={{
+            ...s.inp,
+            color: '#e8a236', fontWeight: 700,
+            border: item.unit_price !== item.original_price && item.original_price > 0
+                ? '1px solid rgba(232,162,54,.6)'
+                : '1px solid #2e2820'
+        }}
+    />
+    <div style={{ color: '#4a4238', fontSize: 10, marginTop: 3 }}>
+        Subtotal: ₱{item.total_price.toFixed(2)}
+    </div>
+</div>
 
                                     {/* Tingi Calculator Hint */}
                                     {item.is_tingi && item.tingi_price > 0 && amountGiven && (
@@ -411,7 +433,8 @@ export default function Dashboard() {
                                         </div>
                                     )}
                                 </div>
-                            ))}
+                            </div>
+                        ))}
 
                             {/* Add Item Button */}
                             <button onClick={addItem} style={{
