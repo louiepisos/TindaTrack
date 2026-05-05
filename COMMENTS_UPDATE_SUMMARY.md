@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 71a891a4300ddddebbe98e7125e645459f7c1620
 ## Files Updated (By Category)
 
 ### Controllers (10 files)
@@ -59,19 +62,19 @@
 
 **File Headers:**
 ```php
-// ProductController - nag-manage ng inventory products
-// Nag-handle ng CRUD operations para sa products
+// ProductController - nag-manage sa inventory products
+// Nag-handle nsa CRUD operations para sa products
 ```
 
 **Function Documentation:**
 ```php
-// Ipakita lahat ng active products sa table para sa frontend
-// Kunin lahat ng products na active with relationships
+// Ipakita tanan nga active products sa table para sa frontend
+// Kuhaon tanan nga products na active with relationships
 ```
 
 **Inline Comments:**
 ```php
-// Mag-decrement ng product stock - ito ay nag-reduce ng available inventory
+// Mag-decrement sa product stock -nag-reduce sa available inventory
 Product::where('id', $item['product_id'])
     ->decrement('stock_quantity', $item['quantity']);
 ```
@@ -99,5 +102,8 @@ Product::where('id', $item['product_id'])
 ✅ **Credit Management** - Utang records, partial/full payments
 ✅ **Dashboard Metrics** - Revenue, profit, profit margin calculations
 ✅ **Database Seeders** - Demo data for testing
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 71a891a4300ddddebbe98e7125e645459f7c1620
