@@ -149,6 +149,10 @@ export default function Products() {
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
                     }}>📋 Utang</button>
+                    <button onClick={() => router.get('/sales')} style={{
+                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
+                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
+                    }}>🧾 Sales</button>
                     <button onClick={() => router.post('/logout')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
