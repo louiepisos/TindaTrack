@@ -9,12 +9,58 @@ use App\Models\UtangItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 // SaleController - ga handle sa POS (Point of Sale) transactions
 // Naga record sa sales, nag-decrement sa stock, og nag-create og utang records
 
 class SaleController extends Controller
 {
+    // Ipakita ang complete sale history with revenue summaries
+    public function index()
+    {
+        $sales = Sale::with(['items.product', 'user', 'utang'])
+            ->latest()
+            ->get();
+
+        $totalRevenue = (float) $sales->sum('total_amount');
+        $paidRevenue = (float) $sales->where('payment_type', 'paid')->sum('total_amount');
+        $utangRevenue = (float) $sales->where('payment_type', 'utang')->sum('total_amount');
+        $todayRevenue = (float) $sales
+            ->filter(fn ($sale) => $sale->created_at->isToday())
+            ->sum('total_amount');
+
+        return Inertia::render('Sales/Index', [
+            'summary' => [
+                'totalSales' => $sales->count(),
+                'totalRevenue' => round($totalRevenue, 2),
+                'paidRevenue' => round($paidRevenue, 2),
+                'utangRevenue' => round($utangRevenue, 2),
+                'todayRevenue' => round($todayRevenue, 2),
+            ],
+            'sales' => $sales->map(fn ($sale) => [
+                'id' => $sale->id,
+                'receipt_no' => 'SALE-' . str_pad($sale->id, 6, '0', STR_PAD_LEFT),
+                'total_amount' => $sale->total_amount,
+                'amount_given' => $sale->amount_given,
+                'change_amount' => $sale->change_amount,
+                'payment_type' => $sale->payment_type,
+                'customer_name' => $sale->utang?->customer_name,
+                'cashier' => $sale->user?->name ?? 'Unknown',
+                'created_at' => $sale->created_at->format('M d, Y g:i A'),
+                'items_count' => $sale->items->sum('quantity'),
+                'items' => $sale->items->map(fn ($item) => [
+                    'product' => $item->product?->name ?? 'Deleted product',
+                    'emoji' => $item->product?->emoji ?? '📦',
+                    'qty' => $item->quantity,
+                    'is_tingi' => $item->is_tingi,
+                    'price' => $item->unit_price,
+                    'total' => $item->total_price,
+                ]),
+            ]),
+        ]);
+    }
+
     // Store ang bag ong sale transaction
     // Pwedeng full payment o installment (utang)
     public function store(Request $request)
