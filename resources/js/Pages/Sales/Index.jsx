@@ -8,13 +8,12 @@ export default function SalesHistory() {
     const [expanded, setExpanded] = useState(null)
 
     const filtered = sales.filter(s => {
-        const matchSearch = !search ||
-            s.customer?.toLowerCase().includes(search.toLowerCase()) ||
-            s.cashier?.toLowerCase().includes(search.toLowerCase()) ||
-            s.id.toString().includes(search)
-        const matchFilter = filter === 'all' || s.payment_type === filter
-        return matchSearch && matchFilter
-    })
+    const matchSearch = !search ||
+        s.customer?.toLowerCase().includes(search.toLowerCase()) ||
+        s.id.toString().includes(search)
+    const matchFilter = filter === 'all' || s.payment_type === filter
+    return matchSearch && matchFilter
+})
 
     const inp = {
         padding: '9px 14px', borderRadius: 8,
@@ -101,10 +100,10 @@ export default function SalesHistory() {
                 {/* Filters */}
                 <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
                     <input
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        placeholder="🔍  Search by customer, cashier, or ID..."
-                        style={{ ...inp, flex: 1, minWidth: 240 }}
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      placeholder="🔍  Search by Sale ID..."
+                      style={{ ...inp, flex: 1, minWidth: 240 }}
                     />
                     {['all', 'paid', 'utang'].map(f => (
                         <button key={f} onClick={() => setFilter(f)} style={{
@@ -166,7 +165,7 @@ export default function SalesHistory() {
                                             )}
                                         </div>
                                         <div style={{ color: '#7a6e60', fontSize: 12, marginTop: 2 }}>
-                                            {sale.created_at} · by {sale.cashier}
+                                            {sale.created_at}
                                         </div>
                                     </div>
                                 </div>

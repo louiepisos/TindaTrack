@@ -160,7 +160,7 @@ export default function Products() {
                 </div>
             </div>
 
-            // Main content area - ang sulod sa produkto list
+            {/* Main content area - ang sulod sa produkto list */}
             <div style={{ padding: 32 }}>
                 {/* Header - ang title ug add button */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
