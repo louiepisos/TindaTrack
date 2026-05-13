@@ -40,8 +40,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy'); // Delete supplier
 
     // ── POS/SALES ROUTES ──
-    Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');   // View sale history and revenue
-    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');   // Record sale transaction
+      
+    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');// Record sale transaction
+Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');    // View sale history and revenue
 
     // ── UTANG (CREDIT) ROUTES ──
     Route::get('/utang', [UtangController::class, 'index'])->name('utang.index');   // View all credit records

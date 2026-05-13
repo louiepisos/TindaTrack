@@ -1,57 +1,36 @@
-import { Fragment, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
 
-// Sales history page - tracks every sale transaction and revenue totals
 export default function SalesHistory() {
     const { sales, summary } = usePage().props
     const [search, setSearch] = useState('')
-    const [paymentFilter, setPaymentFilter] = useState('all')
+    const [filter, setFilter] = useState('all')
     const [expanded, setExpanded] = useState(null)
 
-    const money = (value) => `₱${parseFloat(value || 0).toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    })}`
+    const filtered = sales.filter(s => {
+        const matchSearch = !search ||
+            s.customer?.toLowerCase().includes(search.toLowerCase()) ||
+            s.cashier?.toLowerCase().includes(search.toLowerCase()) ||
+            s.id.toString().includes(search)
+        const matchFilter = filter === 'all' || s.payment_type === filter
+        return matchSearch && matchFilter
+    })
 
-    const filteredSales = useMemo(() => sales.filter((sale) => {
-        const query = search.toLowerCase()
-        const matchesSearch = !query
-            || sale.receipt_no.toLowerCase().includes(query)
-            || sale.cashier.toLowerCase().includes(query)
-            || (sale.customer_name || '').toLowerCase().includes(query)
-            || sale.items.some((item) => item.product.toLowerCase().includes(query))
-        const matchesPayment = paymentFilter === 'all' || sale.payment_type === paymentFilter
-
-        return matchesSearch && matchesPayment
-    }), [sales, search, paymentFilter])
-
-    const navButton = {
-        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
-        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13,
-    }
-
-    const card = {
-        background: '#1a1612', border: '1px solid #2e2820',
-        borderRadius: 16, padding: 24,
-    }
-
-    const input = {
-        padding: '11px 14px', borderRadius: 10,
+    const inp = {
+        padding: '9px 14px', borderRadius: 8,
         background: '#221e19', border: '1px solid #2e2820',
-        color: '#f0e8d8', fontSize: 13, outline: 'none', boxSizing: 'border-box',
+        color: '#f0e8d8', fontSize: 13, outline: 'none',
+        boxSizing: 'border-box'
     }
-
-    const badgeStyle = (paymentType) => paymentType === 'paid'
-        ? { background: 'rgba(90,173,127,.12)', color: '#5aad7f', border: '1px solid rgba(90,173,127,.25)' }
-        : { background: 'rgba(232,162,54,.12)', color: '#e8a236', border: '1px solid rgba(232,162,54,.25)' }
 
     return (
         <div style={{ minHeight: '100vh', background: '#0f0d0a', fontFamily: "'DM Sans', sans-serif" }}>
-            {/* Top navigation */}
+
+            {/* Topbar */}
             <div style={{
                 background: '#1a1612', borderBottom: '1px solid #2e2820',
                 padding: '0 32px', height: 64,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontSize: 24 }}>🏪</span>
@@ -59,145 +38,223 @@ export default function SalesHistory() {
                         fontSize: 20, fontWeight: 800,
                         background: 'linear-gradient(135deg, #e8a236, #f0c060)',
                         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
+                        backgroundClip: 'text'
                     }}>TindaTrack</span>
                 </div>
                 <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => router.get('/dashboard')} style={navButton}>📊 Dashboard</button>
-                    <button onClick={() => router.get('/products')} style={navButton}>📦 Products</button>
-                    <button onClick={() => router.get('/utang')} style={navButton}>📋 Utang</button>
-                    <button onClick={() => router.post('/logout')} style={navButton}>Logout</button>
+                    <button onClick={() => router.get('/dashboard')} style={{
+                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
+                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
+                    }}>📊 Dashboard</button>
+                    <button onClick={() => router.get('/products')} style={{
+                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
+                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
+                    }}>📦 Products</button>
+                    <button onClick={() => router.get('/utang')} style={{
+                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
+                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
+                    }}>📋 Utang</button>
+                    <button onClick={() => router.post('/logout')} style={{
+                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
+                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
+                    }}>Logout</button>
                 </div>
             </div>
 
             <div style={{ padding: 32 }}>
+
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
-                    <div>
-                        <h1 style={{ color: '#f0e8d8', fontSize: 26, fontWeight: 800, margin: '0 0 4px' }}>🧾 Sale History</h1>
-                        <p style={{ color: '#7a6e60', margin: 0, fontSize: 14 }}>Track every sale, payment type, and revenue total.</p>
-                    </div>
-                    <button onClick={() => router.get('/dashboard')} style={{
-                        padding: '12px 22px', borderRadius: 12, border: 'none',
-                        background: 'linear-gradient(135deg, #e8a236, #c45c2a)',
-                        color: '#fff', fontWeight: 800, fontSize: 14, cursor: 'pointer',
-                        boxShadow: '0 4px 20px rgba(196,92,42,.35)',
-                    }}>🛒 New Sale</button>
+                <div style={{ marginBottom: 28 }}>
+                    <h1 style={{ color: '#f0e8d8', fontSize: 26, fontWeight: 800, margin: '0 0 4px' }}>
+                        🧾 Sales History
+                    </h1>
+                    <p style={{ color: '#7a6e60', margin: 0, fontSize: 14 }}>
+                        {sales.length} total transactions
+                    </p>
                 </div>
 
-                {/* Revenue summary */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 24 }}>
+                {/* Summary Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
                     {[
-                        { label: 'Total Sales', value: summary.totalSales, icon: '🧾', color: '#e8a236' },
-                        { label: 'Total Revenue', value: money(summary.totalRevenue), icon: '💰', color: '#5aad7f' },
-                        { label: 'Cash/Paid Revenue', value: money(summary.paidRevenue), icon: '✅', color: '#5aad7f' },
-                        { label: 'Utang Revenue', value: money(summary.utangRevenue), icon: '📋', color: '#e8a236' },
-                        { label: 'Today Revenue', value: money(summary.todayRevenue), icon: '📈', color: '#4a90c4' },
-                    ].map((item) => (
-                        <div key={item.label} style={card}>
-                            <div style={{ fontSize: 26, marginBottom: 10 }}>{item.icon}</div>
-                            <div style={{ color: item.color, fontSize: 22, fontWeight: 800 }}>{item.value}</div>
-                            <div style={{ color: '#7a6e60', fontSize: 12, marginTop: 6 }}>{item.label}</div>
+                        { label: 'Total Sales',    value: summary.totalSales,   icon: '🧾', color: '#e8a236', prefix: '' },
+                        { label: 'Total Revenue',  value: summary.totalRevenue, icon: '💰', color: '#5aad7f', prefix: '₱' },
+                        { label: "Today's Revenue",value: summary.todayRevenue, icon: '📈', color: '#4a90c4', prefix: '₱' },
+                        { label: 'Utang Amount',   value: summary.totalUtang,   icon: '📋', color: '#d9534f', prefix: '₱' },
+                    ].map(c => (
+                        <div key={c.label} style={{
+                            background: '#1a1612', border: '1px solid #2e2820',
+                            borderRadius: 16, padding: 24
+                        }}>
+                            <div style={{ fontSize: 28, marginBottom: 8 }}>{c.icon}</div>
+                            <div style={{ fontSize: 26, fontWeight: 800, color: c.color }}>
+                                {c.prefix}{typeof c.value === 'number'
+                                    ? c.prefix
+                                        ? parseFloat(c.value).toLocaleString('en-PH', { minimumFractionDigits: 2 })
+                                        : c.value
+                                    : c.value}
+                            </div>
+                            <div style={{ color: '#7a6e60', fontSize: 13, marginTop: 4 }}>{c.label}</div>
                         </div>
                     ))}
                 </div>
 
                 {/* Filters */}
-                <div style={{ ...card, display: 'flex', gap: 12, alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
                     <input
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search receipt, cashier, customer, or product..."
-                        style={{ ...input, flex: 1 }}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="🔍  Search by customer, cashier, or ID..."
+                        style={{ ...inp, flex: 1, minWidth: 240 }}
                     />
-                    <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} style={input}>
-                        <option value="all">All payments</option>
-                        <option value="paid">Paid only</option>
-                        <option value="utang">Utang only</option>
-                    </select>
+                    {['all', 'paid', 'utang'].map(f => (
+                        <button key={f} onClick={() => setFilter(f)} style={{
+                            padding: '9px 18px', borderRadius: 8, cursor: 'pointer',
+                            fontSize: 13, fontWeight: 500, textTransform: 'capitalize',
+                            border: filter === f ? '1px solid rgba(232,162,54,.4)' : '1px solid #2e2820',
+                            background: filter === f ? 'rgba(232,162,54,.1)' : '#1a1612',
+                            color: filter === f ? '#e8a236' : '#7a6e60',
+                        }}>
+                            {f === 'all' ? 'All' : f === 'paid' ? '✅ Paid' : '📋 Utang'}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Sales table */}
-                <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ background: '#15120f' }}>
-                                {['Receipt', 'Date', 'Cashier/Customer', 'Items', 'Payment', 'Revenue', ''].map((header) => (
-                                    <th key={header} style={{
-                                        color: '#7a6e60', fontSize: 11, textAlign: 'left',
-                                        padding: '14px 18px', borderBottom: '1px solid #2e2820',
-                                        textTransform: 'uppercase', letterSpacing: '.06em',
-                                    }}>{header}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredSales.length === 0 && (
-                                <tr>
-                                    <td colSpan="7" style={{ color: '#7a6e60', padding: 36, textAlign: 'center' }}>
-                                        No sales found for the current filters.
-                                    </td>
-                                </tr>
-                            )}
-                            {filteredSales.map((sale) => {
-                                const isOpen = expanded === sale.id
+                {/* Sales List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {filtered.length === 0 && (
+                        <div style={{
+                            background: '#1a1612', border: '1px solid #2e2820',
+                            borderRadius: 16, padding: 48, textAlign: 'center', color: '#7a6e60'
+                        }}>
+                            No sales found.
+                        </div>
+                    )}
 
-                                return (
-                                    <Fragment key={sale.id}>
-                                        <tr style={{ borderBottom: isOpen ? 'none' : '1px solid rgba(46,40,32,.55)' }}>
-                                            <td style={{ padding: '16px 18px', color: '#f0e8d8', fontWeight: 800, fontSize: 13 }}>{sale.receipt_no}</td>
-                                            <td style={{ padding: '16px 18px', color: '#7a6e60', fontSize: 13 }}>{sale.created_at}</td>
-                                            <td style={{ padding: '16px 18px' }}>
-                                                <div style={{ color: '#f0e8d8', fontSize: 13, fontWeight: 600 }}>{sale.cashier}</div>
-                                                {sale.customer_name && <div style={{ color: '#7a6e60', fontSize: 12 }}>Customer: {sale.customer_name}</div>}
-                                            </td>
-                                            <td style={{ padding: '16px 18px', color: '#f0e8d8', fontSize: 13 }}>{sale.items_count} pcs</td>
-                                            <td style={{ padding: '16px 18px' }}>
-                                                <span style={{
-                                                    ...badgeStyle(sale.payment_type),
-                                                    display: 'inline-block', padding: '5px 11px', borderRadius: 999,
-                                                    fontSize: 11, fontWeight: 800, textTransform: 'uppercase',
-                                                }}>{sale.payment_type}</span>
-                                            </td>
-                                            <td style={{ padding: '16px 18px', color: '#5aad7f', fontSize: 15, fontWeight: 800 }}>{money(sale.total_amount)}</td>
-                                            <td style={{ padding: '16px 18px', textAlign: 'right' }}>
-                                                <button onClick={() => setExpanded(isOpen ? null : sale.id)} style={{
-                                                    padding: '7px 12px', borderRadius: 8, border: '1px solid #2e2820',
-                                                    background: '#221e19', color: '#e8a236', cursor: 'pointer', fontSize: 12,
-                                                }}>{isOpen ? 'Hide' : 'Details'}</button>
-                                            </td>
-                                        </tr>
-                                        {isOpen && (
-                                            <tr key={`${sale.id}-details`} style={{ borderBottom: '1px solid rgba(46,40,32,.55)' }}>
-                                                <td colSpan="7" style={{ padding: '0 18px 18px' }}>
-                                                    <div style={{ background: '#15120f', border: '1px solid #2e2820', borderRadius: 12, padding: 16 }}>
-                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
-                                                            <div style={{ color: '#7a6e60', fontSize: 12 }}>Amount Given: <strong style={{ color: '#f0e8d8' }}>{money(sale.amount_given)}</strong></div>
-                                                            <div style={{ color: '#7a6e60', fontSize: 12 }}>Change: <strong style={{ color: '#f0e8d8' }}>{money(sale.change_amount)}</strong></div>
-                                                            <div style={{ color: '#7a6e60', fontSize: 12 }}>Line Items: <strong style={{ color: '#f0e8d8' }}>{sale.items.length}</strong></div>
-                                                        </div>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                            <tbody>
-                                                                {sale.items.map((item, idx) => (
-                                                                    <tr key={`${sale.id}-${idx}`}>
-                                                                        <td style={{ padding: '8px 0', color: '#f0e8d8', fontSize: 13 }}>{item.emoji} {item.product}</td>
-                                                                        <td style={{ padding: '8px 0', color: '#7a6e60', fontSize: 12 }}>{item.is_tingi ? 'Tingi' : 'Pack'}</td>
-                                                                        <td style={{ padding: '8px 0', color: '#7a6e60', fontSize: 12 }}>Qty: {item.qty}</td>
-                                                                        <td style={{ padding: '8px 0', color: '#7a6e60', fontSize: 12 }}>Price: {money(item.price)}</td>
-                                                                        <td style={{ padding: '8px 0', color: '#e8a236', fontSize: 13, fontWeight: 700, textAlign: 'right' }}>{money(item.total)}</td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                    {filtered.map(sale => (
+                        <div key={sale.id} style={{
+                            background: '#1a1612', border: '1px solid #2e2820',
+                            borderRadius: 14, overflow: 'hidden',
+                            transition: 'border-color .2s'
+                        }}>
+                            {/* Sale Row */}
+                            <div
+                                onClick={() => setExpanded(expanded === sale.id ? null : sale.id)}
+                                style={{
+                                    padding: '16px 24px', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center',
+                                    justifyContent: 'space-between', gap: 16
+                                }}
+                            >
+                                {/* Left: ID + Time */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                                    <div style={{
+                                        width: 40, height: 40, borderRadius: 10,
+                                        background: sale.payment_type === 'paid'
+                                            ? 'rgba(90,173,127,.12)' : 'rgba(217,83,79,.12)',
+                                        display: 'flex', alignItems: 'center',
+                                        justifyContent: 'center', fontSize: 18, flexShrink: 0
+                                    }}>
+                                        {sale.payment_type === 'paid' ? '✅' : '📋'}
+                                    </div>
+                                    <div>
+                                        <div style={{ color: '#f0e8d8', fontWeight: 600, fontSize: 14 }}>
+                                            Sale #{sale.id}
+                                            {sale.customer && (
+                                                <span style={{ color: '#7a6e60', fontWeight: 400, fontSize: 12, marginLeft: 8 }}>
+                                                    — {sale.customer}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div style={{ color: '#7a6e60', fontSize: 12, marginTop: 2 }}>
+                                            {sale.created_at} · by {sale.cashier}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right: Amount + Badge */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                    <span style={{
+                                        padding: '3px 10px', borderRadius: 20,
+                                        fontSize: 11, fontWeight: 600,
+                                        background: sale.payment_type === 'paid'
+                                            ? 'rgba(90,173,127,.12)' : 'rgba(217,83,79,.12)',
+                                        color: sale.payment_type === 'paid' ? '#5aad7f' : '#d9534f',
+                                        border: `1px solid ${sale.payment_type === 'paid'
+                                            ? 'rgba(90,173,127,.25)' : 'rgba(217,83,79,.25)'}`,
+                                    }}>
+                                        {sale.payment_type === 'paid' ? 'Paid' : 'Utang'}
+                                    </span>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ color: '#e8a236', fontWeight: 800, fontSize: 16 }}>
+                                            ₱{parseFloat(sale.total_amount).toFixed(2)}
+                                        </div>
+                                        {sale.payment_type === 'paid' && (
+                                            <div style={{ color: '#7a6e60', fontSize: 11 }}>
+                                                Change: ₱{parseFloat(sale.change_amount).toFixed(2)}
+                                            </div>
                                         )}
-                                    </Fragment>
-                                )
-                            })}
-                        </tbody>
-                    </table>
+                                    </div>
+                                    <span style={{ color: '#4a4238', fontSize: 18 }}>
+                                        {expanded === sale.id ? '▲' : '▼'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Expanded Items */}
+                            {expanded === sale.id && (
+                                <div style={{
+                                    borderTop: '1px solid #2e2820',
+                                    padding: '14px 24px', background: '#161310'
+                                }}>
+                                    <div style={{ color: '#7a6e60', fontSize: 11, marginBottom: 10,
+                                        textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                                        Items Purchased
+                                    </div>
+                                    {sale.items.map((item, i) => (
+                                        <div key={i} style={{
+                                            display: 'flex', justifyContent: 'space-between',
+                                            alignItems: 'center', padding: '8px 0',
+                                            borderBottom: i < sale.items.length - 1
+                                                ? '1px solid rgba(46,40,32,.5)' : 'none'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <span style={{ fontSize: 16 }}>{item.emoji}</span>
+                                                <div>
+                                                    <span style={{ color: '#f0e8d8', fontSize: 13 }}>
+                                                        {item.product}
+                                                    </span>
+                                                    {item.is_tingi && (
+                                                        <span style={{
+                                                            marginLeft: 6, fontSize: 10, fontWeight: 600,
+                                                            color: '#5aad7f', background: 'rgba(90,173,127,.1)',
+                                                            padding: '2px 6px', borderRadius: 4
+                                                        }}>tingi</span>
+                                                    )}
+                                                    <div style={{ color: '#7a6e60', fontSize: 11 }}>
+                                                        {item.quantity} × ₱{parseFloat(item.unit_price).toFixed(2)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span style={{ color: '#e8a236', fontWeight: 600, fontSize: 13 }}>
+                                                ₱{parseFloat(item.total).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    {/* Total row */}
+                                    <div style={{
+                                        display: 'flex', justifyContent: 'space-between',
+                                        marginTop: 12, paddingTop: 12,
+                                        borderTop: '1px solid #2e2820'
+                                    }}>
+                                        <span style={{ color: '#7a6e60', fontSize: 13 }}>Total</span>
+                                        <span style={{ color: '#e8a236', fontWeight: 800, fontSize: 15 }}>
+                                            ₱{parseFloat(sale.total_amount).toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
