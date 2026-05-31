@@ -1,17 +1,16 @@
-// Importing necessary libraries for React and Inertia.js routing - gamit sa produkto management
-import { useState } from 'react'
+// Product management page - organized, searchable, and responsive inventory UI
+import { useMemo, useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
 
-// Main component for Products page - ang sulod sa produkto list ug management
 export default function Products() {
-    // Getting data from server props - daghan produkto, categories, suppliers
     const { products, categories, suppliers } = usePage().props
-    // State variables for modal, editing, search, form - para sa user interactions
     const [showModal, setShowModal] = useState(false)
     const [editing, setEditing] = useState(null)
     const [search, setSearch] = useState('')
+    const [selectedCategory, setSelectedCategory] = useState('all')
+    const [stockFilter, setStockFilter] = useState('all')
     const [form, setForm] = useState({
-        name: '', emoji: '📦',
+        name: '', sku: '', emoji: '📦',
         category_id: '', supplier_id: '',
         cost_price: '', unit_price: '',
         tingi_price: '', pieces_per_pack: 1,
@@ -19,19 +18,82 @@ export default function Products() {
         unit: 'pcs', selling_mode: 'tingi'
     })
 
-    // List of available emojis for products - daghan choices para sa produkto icons
     const emojis = ['📦','🧃','☕','🍫','🍜','🥛','🧴','🥫','🧂','🍬','🍪','🧻','🪥','🧼','🫙','🐟','🍵','🍟']
 
-    // Filtering products based on search - para makita ang gusto nga produkto
-    const filtered = products.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-    )
+    const categoryOptions = useMemo(() => {
+        const counts = products.reduce((acc, product) => {
+            const key = product.category_id ? String(product.category_id) : 'uncategorized'
+            acc[key] = (acc[key] || 0) + 1
+            return acc
+        }, {})
 
-    // Function to open add modal - para mag-add ug bag-ong produkto
+        return [
+            { id: 'all', name: 'All Products', emoji: '🗂️', count: products.length },
+            ...categories.map(category => ({
+                id: String(category.id),
+                name: category.name,
+                emoji: category.emoji || '📁',
+                count: counts[String(category.id)] || 0,
+            })),
+            { id: 'uncategorized', name: 'Uncategorized', emoji: '📦', count: counts.uncategorized || 0 },
+        ]
+    }, [categories, products])
+
+    const filtered = useMemo(() => {
+        const term = search.trim().toLowerCase()
+
+        return products.filter(product => {
+            const categoryKey = product.category_id ? String(product.category_id) : 'uncategorized'
+            const matchesCategory = selectedCategory === 'all' || selectedCategory === categoryKey
+            const matchesStock = stockFilter === 'all' || product.status === stockFilter
+            const matchesSearch = !term || [
+                product.name,
+                product.sku,
+                product.category,
+            ].some(value => (value || '').toLowerCase().includes(term))
+
+            return matchesCategory && matchesStock && matchesSearch
+        })
+    }, [products, search, selectedCategory, stockFilter])
+
+    const groupedProducts = useMemo(() => {
+        const groups = filtered.reduce((acc, product) => {
+            const key = product.category_id ? String(product.category_id) : 'uncategorized'
+            const category = categoryOptions.find(option => option.id === key)
+            const fallbackName = product.category || 'Uncategorized'
+
+            if (!acc[key]) {
+                acc[key] = {
+                    id: key,
+                    name: category?.name || fallbackName,
+                    emoji: category?.emoji || '📦',
+                    products: [],
+                }
+            }
+
+            acc[key].products.push(product)
+            return acc
+        }, {})
+
+        return Object.values(groups).sort((a, b) => a.name.localeCompare(b.name))
+    }, [categoryOptions, filtered])
+
+    const stockSummary = useMemo(() => ({
+        all: products.length,
+        critical: products.filter(product => product.status === 'critical').length,
+        low: products.filter(product => product.status === 'low').length,
+    }), [products])
+
+    const resetFilters = () => {
+        setSearch('')
+        setSelectedCategory('all')
+        setStockFilter('all')
+    }
+
     const openAdd = () => {
         setEditing(null)
         setForm({
-            name: '', emoji: '📦', category_id: '', supplier_id: '',
+            name: '', sku: '', emoji: '📦', category_id: '', supplier_id: '',
             cost_price: '', unit_price: '', tingi_price: '',
             pieces_per_pack: 1, stock_quantity: '',
             restock_threshold: 10, unit: 'pcs', selling_mode: 'tingi'
@@ -39,39 +101,38 @@ export default function Products() {
         setShowModal(true)
     }
 
-    // Function to open edit modal - para mag-edit sa existing produkto
-    const openEdit = (p) => {
-        setEditing(p.id)
-        const mode = p.unit_price && p.tingi_price ? 'both'
-            : p.tingi_price ? 'tingi' : 'pack'
+    const openEdit = (product) => {
+        setEditing(product.id)
+        const mode = product.unit_price && product.tingi_price ? 'both'
+            : product.tingi_price ? 'tingi' : 'pack'
+
         setForm({
-            name: p.name, emoji: p.emoji,
-            category_id: p.category_id ?? '',
-            supplier_id: p.supplier_id ?? '',
-            cost_price: p.cost_price ?? '',
-            unit_price: p.unit_price ?? '',
-            tingi_price: p.tingi_price ?? '',
-            pieces_per_pack: p.pieces_per_pack ?? 1,
-            stock_quantity: p.stock,
-            restock_threshold: p.threshold,
-            unit: p.unit,
+            name: product.name,
+            sku: product.sku ?? '',
+            emoji: product.emoji,
+            category_id: product.category_id ?? '',
+            supplier_id: product.supplier_id ?? '',
+            cost_price: product.cost_price ?? '',
+            unit_price: product.unit_price ?? '',
+            tingi_price: product.tingi_price ?? '',
+            pieces_per_pack: product.pieces_per_pack ?? 1,
+            stock_quantity: product.stock,
+            restock_threshold: product.threshold,
+            unit: product.unit,
             selling_mode: mode
         })
         setShowModal(true)
     }
 
-    // Function to save product - para i-save ang produkto sa database
     const save = () => {
-        // Clear prices based on selling mode
         const data = { ...form }
         if (data.selling_mode === 'tingi') {
-            data.unit_price = data.tingi_price // unit price = tingi price
+            data.unit_price = data.tingi_price
             data.pieces_per_pack = 1
         } else if (data.selling_mode === 'pack') {
             data.tingi_price = null
             data.pieces_per_pack = 1
         }
-        // 'both' keeps all values as is
 
         if (editing) {
             router.put(`/products/${editing}`, data, {
@@ -84,430 +145,370 @@ export default function Products() {
         }
     }
 
-    // Function to delete product - para tangtangon ang produkto
     const destroy = (id, name) => {
         if (confirm(`Delete "${name}"?`)) router.delete(`/products/${id}`)
     }
 
-    // Function to get status style - para sa stock status display
     const statusStyle = (status) => {
         if (status === 'critical') return { bg: '#3d1a1a', color: '#d9534f', label: 'Critical' }
         if (status === 'low') return { bg: '#3d2e0a', color: '#e8a236', label: 'Low Stock' }
         return { bg: '#1a3d2a', color: '#5aad7f', label: 'In Stock' }
     }
 
-    // Input style object - gamit sa form inputs
-    const inp = {
-        width: '100%', padding: '10px 14px', borderRadius: 8,
-        background: '#221e19', border: '1px solid #2e2820',
-        color: '#f0e8d8', fontSize: 13, outline: 'none', boxSizing: 'border-box'
+    const productMode = (product) => {
+        const hasTingi = product.tingi_price && parseFloat(product.tingi_price) > 0
+        const hasPack = product.unit_price && parseFloat(product.unit_price) > 0
+        return {
+            hasTingi,
+            hasPack,
+            mode: hasTingi && hasPack ? 'both' : hasTingi ? 'tingi' : 'pack',
+        }
     }
 
-    // Label component function - para sa form labels
+    const inputClass = 'product-input'
+
     const label = (text, hint = '') => (
-        <div style={{ marginBottom: 6 }}>
-            <label style={{ color: '#7a6e60', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.07em' }}>
-                {text}
-            </label>
-            {hint && <span style={{ color: '#4a4238', fontSize: 11, marginLeft: 8 }}>{hint}</span>}
+        <div className="product-field-label-row">
+            <label className="product-field-label">{text}</label>
+            {hint && <span className="product-field-hint">{hint}</span>}
         </div>
     )
 
-    // Selling mode options - daghan options para sa baligya mode
     const sellingModes = [
         { value: 'tingi', label: '🍬 By Piece (Tingi)', desc: 'Sell per piece only (e.g. candy, matches)' },
         { value: 'pack',  label: '📦 By Pack only',    desc: 'Sell as whole pack only (e.g. noodles, soap)' },
         { value: 'both',  label: '🔀 Both',            desc: 'Can sell by piece or by pack (e.g. Milo sachet)' },
     ]
 
-    // Main JSX return - ang display sa product page
+    const renderPrice = (product) => {
+        const mode = productMode(product)
+
+        return (
+            <div className="product-price-stack">
+                {mode.hasPack && (
+                    <div className="product-pack-price">₱{parseFloat(product.unit_price).toFixed(2)} <span>/ pack</span></div>
+                )}
+                {mode.hasTingi && (
+                    <div className="product-tingi-price">₱{parseFloat(product.tingi_price).toFixed(2)} <span>/ pc</span></div>
+                )}
+            </div>
+        )
+    }
+
+    const renderModeBadge = (product) => {
+        const { mode } = productMode(product)
+        return (
+            <span className={`product-mode-badge product-mode-badge--${mode}`}>
+                {mode === 'both' ? '🔀 Both' : mode === 'tingi' ? '🍬 Tingi' : '📦 Pack'}
+            </span>
+        )
+    }
+
+    const renderActions = (product) => (
+        <div className="product-row-actions">
+            <button type="button" onClick={() => openEdit(product)} className="product-icon-button" aria-label={`Edit ${product.name}`}>✏️</button>
+            <button type="button" onClick={() => destroy(product.id, product.name)} className="product-icon-button" aria-label={`Delete ${product.name}`}>🗑️</button>
+        </div>
+    )
+
     return (
-        // Main container - ang sulod sa tibuok page
-        <div style={{ minHeight: '100vh', background: '#0f0d0a', fontFamily: "'DM Sans', sans-serif" }}>
-
-            {/* Topbar - ang navigation bar sa taas */}
-            <div style={{
-                background: '#1a1612', borderBottom: '1px solid #2e2820',
-                padding: '0 32px', height: 64,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 24 }}>🏪</span>
-                    <span style={{
-                        fontSize: 20, fontWeight: 800,
-                        background: 'linear-gradient(135deg, #e8a236, #f0c060)',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text'
-                    }}>TindaTrack</span>
+        <div className="products-page">
+            <header className="products-topbar">
+                <div className="products-brand">
+                    <span className="products-brand-icon">🏪</span>
+                    <span className="products-brand-name">TindaTrack</span>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => router.get('/dashboard')} style={{
-                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
-                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>📊 Dashboard</button>
-                    <button onClick={() => router.get('/utang')} style={{
-                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
-                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>📋 Utang</button>
-                    <button onClick={() => router.get('/sales')} style={{
-                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
-                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>🧾 Sales</button>
-                    <button onClick={() => router.post('/logout')} style={{
-                        padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
-                        background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>Logout</button>
-                </div>
-            </div>
+                <nav className="products-nav" aria-label="Primary navigation">
+                    <button type="button" onClick={() => router.get('/dashboard')}>📊 <span>Dashboard</span></button>
+                    <button type="button" onClick={() => router.get('/utang')}>📋 <span>Utang</span></button>
+                    <button type="button" onClick={() => router.get('/sales')}>🧾 <span>Sales</span></button>
+                    <button type="button" onClick={() => router.post('/logout')}>↩ <span>Logout</span></button>
+                </nav>
+            </header>
 
-            {/* Main content area - ang sulod sa produkto list */}
-            <div style={{ padding: 32 }}>
-                {/* Header - ang title ug add button */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+            <main className="products-main">
+                <section className="products-hero">
                     <div>
-                        <h1 style={{ color: '#f0e8d8', fontSize: 26, fontWeight: 800, margin: '0 0 4px' }}>📦 Products</h1>
-                        <p style={{ color: '#7a6e60', margin: 0, fontSize: 14 }}>{products.length} products in catalog</p>
+                        <p className="products-eyebrow">Inventory Management</p>
+                        <h1>📦 Products</h1>
+                        <p>{products.length} products in catalog · {categories.length} active categories</p>
                     </div>
-                    <button onClick={openAdd} style={{
-                        padding: '10px 20px', borderRadius: 10, border: 'none',
-                        background: 'linear-gradient(135deg, #e8a236, #c45c2a)',
-                        color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer'
-                    }}>＋ Add Product</button>
-                </div>
+                    <button type="button" onClick={openAdd} className="product-primary-button">＋ Add Product</button>
+                </section>
 
-                {/* Search - para mag-search sa produkto */}
-                <div style={{ marginBottom: 20 }}>
-                    <input
-                        value={search} onChange={e => setSearch(e.target.value)}
-                        placeholder="🔍  Search products..."
-                        style={{ ...inp, maxWidth: 360, padding: '10px 16px' }}
-                    />
-                </div>
+                <section className="products-toolbar" aria-label="Product search and filters">
+                    <div className="products-search-wrap">
+                        <label htmlFor="product-search">Search products</label>
+                        <input
+                            id="product-search"
+                            value={search}
+                            onChange={event => setSearch(event.target.value)}
+                            placeholder="Search by name, SKU/barcode, or category..."
+                            className={inputClass}
+                        />
+                    </div>
 
-                {/* Table - ang list sa produkto */}
-                <div style={{ background: '#1a1612', border: '1px solid #2e2820', borderRadius: 16, overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ background: 'rgba(255,255,255,.02)' }}>
-                                {['Product', 'Category', 'Selling Mode', 'Price', 'Stock', 'Status', 'Actions'].map(h => (
-                                    <th key={h} style={{
-                                        color: '#7a6e60', fontSize: 11, textAlign: 'left',
-                                        padding: '12px 20px', borderBottom: '1px solid #2e2820',
-                                        textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 500
-                                    }}>{h}</th>
+                    <div className="products-filter-grid">
+                        <div>
+                            <label htmlFor="category-filter">Category</label>
+                            <select id="category-filter" value={selectedCategory} onChange={event => setSelectedCategory(event.target.value)} className={inputClass}>
+                                {categoryOptions.map(category => (
+                                    <option key={category.id} value={category.id}>{category.emoji} {category.name} ({category.count})</option>
                                 ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.map((p, i) => {
-                                const s = statusStyle(p.status)
-                                const hasTingi = p.tingi_price && parseFloat(p.tingi_price) > 0
-                                const hasPack = p.unit_price && parseFloat(p.unit_price) > 0
-                                const mode = hasTingi && hasPack ? 'both' : hasTingi ? 'tingi' : 'pack'
-                                return (
-                                    <tr key={p.id} style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(46,40,32,.5)' : 'none' }}>
-                                        <td style={{ padding: '14px 20px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <div style={{
-                                                    width: 36, height: 36, borderRadius: 9, background: '#221e19',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18
-                                                }}>{p.emoji}</div>
-                                                <div>
-                                                    <div style={{ color: '#f0e8d8', fontWeight: 500, fontSize: 13 }}>{p.name}</div>
-                                                    <div style={{ color: '#7a6e60', fontSize: 11 }}>{p.unit}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '14px 20px', color: '#7a6e60', fontSize: 13 }}>{p.category ?? '—'}</td>
-                                        <td style={{ padding: '14px 20px' }}>
-                                            <span style={{
-                                                padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
-                                                background: mode === 'both' ? 'rgba(74,144,196,.12)' : mode === 'tingi' ? 'rgba(90,173,127,.12)' : 'rgba(232,162,54,.12)',
-                                                color: mode === 'both' ? '#4a90c4' : mode === 'tingi' ? '#5aad7f' : '#e8a236',
-                                            }}>
-                                                {mode === 'both' ? '🔀 Both' : mode === 'tingi' ? '🍬 Tingi' : '📦 Pack'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '14px 20px' }}>
-                                            {hasPack && <div style={{ color: '#e8a236', fontSize: 13, fontWeight: 600 }}>₱{parseFloat(p.unit_price).toFixed(2)} <span style={{ color: '#4a4238', fontWeight: 400 }}>/ pack</span></div>}
-                                            {hasTingi && <div style={{ color: '#5aad7f', fontSize: 13, fontWeight: 600 }}>₱{parseFloat(p.tingi_price).toFixed(2)} <span style={{ color: '#4a4238', fontWeight: 400 }}>/ pc</span></div>}
-                                        </td>
-                                        <td style={{ padding: '14px 20px', color: '#f0e8d8', fontSize: 13 }}>{p.stock} {p.unit}</td>
-                                        <td style={{ padding: '14px 20px' }}>
-                                            <span style={{
-                                                padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
-                                                background: s.bg, color: s.color
-                                            }}>{s.label}</span>
-                                        </td>
-                                        <td style={{ padding: '14px 20px' }}>
-                                            <div style={{ display: 'flex', gap: 6 }}>
-                                                <button onClick={() => openEdit(p)} style={{
-                                                    width: 30, height: 30, borderRadius: 7, border: '1px solid #2e2820',
-                                                    background: '#221e19', cursor: 'pointer', fontSize: 13
-                                                }}>✏️</button>
-                                                <button onClick={() => destroy(p.id, p.name)} style={{
-                                                    width: 30, height: 30, borderRadius: 7, border: '1px solid #2e2820',
-                                                    background: '#221e19', cursor: 'pointer', fontSize: 13
-                                                }}>🗑️</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )
-                            })}
-                        </tbody>
-                    </table>
-                    {filtered.length === 0 && (
-                        <div style={{ padding: 48, textAlign: 'center', color: '#7a6e60' }}>No products found.</div>
-                    )}
-                </div>
-            </div>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="stock-filter">Stock Status</label>
+                            <select id="stock-filter" value={stockFilter} onChange={event => setStockFilter(event.target.value)} className={inputClass}>
+                                <option value="all">All stock ({stockSummary.all})</option>
+                                <option value="critical">Critical ({stockSummary.critical})</option>
+                                <option value="low">Low stock ({stockSummary.low})</option>
+                            </select>
+                        </div>
+                    </div>
 
-            {/* Modal - ang popup para add/edit produkto */}
+                    <button type="button" onClick={resetFilters} className="product-secondary-button">Reset</button>
+                </section>
+
+                <section className="products-category-tabs" aria-label="Quick category filters">
+                    {categoryOptions.map(category => (
+                        <button
+                            key={category.id}
+                            type="button"
+                            className={selectedCategory === category.id ? 'active' : ''}
+                            onClick={() => setSelectedCategory(category.id)}
+                        >
+                            <span>{category.emoji}</span>
+                            <strong>{category.name}</strong>
+                            <em>{category.count}</em>
+                        </button>
+                    ))}
+                </section>
+
+                <section className="products-results-card">
+                    <div className="products-results-header">
+                        <div>
+                            <h2>Product Catalog</h2>
+                            <p>{filtered.length} matching products grouped by category</p>
+                        </div>
+                        <div className="products-results-meta">Scrollable inventory list</div>
+                    </div>
+
+                    <div className="products-scroll-area">
+                        {groupedProducts.map(group => (
+                            <div className="products-category-group" key={group.id}>
+                                <div className="products-group-header">
+                                    <div>
+                                        <span>{group.emoji}</span>
+                                        <strong>{group.name}</strong>
+                                    </div>
+                                    <em>{group.products.length} items</em>
+                                </div>
+
+                                <div className="products-table-wrap">
+                                    <table className="products-table">
+                                        <thead>
+                                            <tr>
+                                                {['Product', 'SKU/Barcode', 'Selling Mode', 'Price', 'Stock', 'Status', 'Actions'].map(header => (
+                                                    <th key={header}>{header}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {group.products.map(product => {
+                                                const stockStatus = statusStyle(product.status)
+                                                return (
+                                                    <tr key={product.id}>
+                                                        <td>
+                                                            <div className="product-name-cell">
+                                                                <div className="product-emoji">{product.emoji}</div>
+                                                                <div>
+                                                                    <strong>{product.name}</strong>
+                                                                    <span>{product.category ?? 'Uncategorized'}</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="product-muted-cell">{product.sku || '—'}</td>
+                                                        <td>{renderModeBadge(product)}</td>
+                                                        <td>{renderPrice(product)}</td>
+                                                        <td className="product-stock-cell">{product.stock} {product.unit}</td>
+                                                        <td><span className="product-status-pill" style={{ background: stockStatus.bg, color: stockStatus.color }}>{stockStatus.label}</span></td>
+                                                        <td>{renderActions(product)}</td>
+                                                    </tr>
+                                                )
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="products-mobile-list">
+                                    {group.products.map(product => {
+                                        const stockStatus = statusStyle(product.status)
+                                        return (
+                                            <article className="product-mobile-card" key={product.id}>
+                                                <div className="product-mobile-card-header">
+                                                    <div className="product-name-cell">
+                                                        <div className="product-emoji">{product.emoji}</div>
+                                                        <div>
+                                                            <strong>{product.name}</strong>
+                                                            <span>{product.sku || 'No SKU'} · {product.category ?? 'Uncategorized'}</span>
+                                                        </div>
+                                                    </div>
+                                                    {renderActions(product)}
+                                                </div>
+                                                <div className="product-mobile-details">
+                                                    <div><span>Mode</span>{renderModeBadge(product)}</div>
+                                                    <div><span>Price</span>{renderPrice(product)}</div>
+                                                    <div><span>Stock</span><strong>{product.stock} {product.unit}</strong></div>
+                                                    <div><span>Status</span><span className="product-status-pill" style={{ background: stockStatus.bg, color: stockStatus.color }}>{stockStatus.label}</span></div>
+                                                </div>
+                                            </article>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+
+                        {filtered.length === 0 && (
+                            <div className="products-empty-state">
+                                <div>🔍</div>
+                                <h3>No products found</h3>
+                                <p>Try another product name, SKU/barcode, category, or stock filter.</p>
+                                <button type="button" onClick={resetFilters} className="product-secondary-button">Clear filters</button>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            </main>
+
             {showModal && (
-                <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200
-                }}>
-                    <div style={{
-                        background: '#1a1612', border: '1px solid #3a3228',
-                        borderRadius: 20, width: 540, maxHeight: '90vh',
-                        overflow: 'auto', padding: 32,
-                        boxShadow: '0 40px 80px rgba(0,0,0,.6)'
-                    }}>
-                        {/* Modal Header - ang title sa modal */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
-                            <h3 style={{ color: '#f0e8d8', fontSize: 18, fontWeight: 700, margin: 0 }}>
-                                {editing ? '✏️ Edit Product' : '＋ Add Product'}
-                            </h3>
-                            <button onClick={() => setShowModal(false)} style={{
-                                background: '#221e19', border: '1px solid #2e2820',
-                                borderRadius: 8, width: 32, height: 32, cursor: 'pointer', color: '#7a6e60'
-                            }}>✕</button>
+                <div className="product-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+                    <div className="product-modal-card">
+                        <div className="product-modal-header">
+                            <h3 id="product-modal-title">{editing ? '✏️ Edit Product' : '＋ Add Product'}</h3>
+                            <button type="button" onClick={() => setShowModal(false)} aria-label="Close product modal">✕</button>
                         </div>
 
-                        {/* Emoji selection - para pilion ang icon sa produkto */}
-                        <div style={{ marginBottom: 16 }}>
+                        <div className="product-form-section">
                             {label('Icon')}
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                                {emojis.map(e => (
-                                    <button key={e} onClick={() => setForm({...form, emoji: e})} style={{
-                                        width: 36, height: 36, borderRadius: 8, fontSize: 18, cursor: 'pointer',
-                                        border: form.emoji === e ? '2px solid #e8a236' : '1px solid #2e2820',
-                                        background: form.emoji === e ? 'rgba(232,162,54,.1)' : '#221e19'
-                                    }}>{e}</button>
+                            <div className="product-emoji-grid">
+                                {emojis.map(emoji => (
+                                    <button key={emoji} type="button" onClick={() => setForm({...form, emoji})} className={form.emoji === emoji ? 'active' : ''}>{emoji}</button>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Product Name input - ang name sa produkto */}
-                        <div style={{ marginBottom: 14 }}>
-                            {label('Product Name *')}
-                            <input type="text" value={form.name}
-                                onChange={e => setForm({...form, name: e.target.value})}
-                                placeholder="e.g. Maxx Candy" style={inp} />
+                        <div className="product-form-grid">
+                            <div className="product-form-section">
+                                {label('Product Name *')}
+                                <input type="text" value={form.name} onChange={event => setForm({...form, name: event.target.value})} placeholder="e.g. Maxx Candy" className={inputClass} />
+                            </div>
+                            <div className="product-form-section">
+                                {label('SKU / Barcode')}
+                                <input type="text" value={form.sku} onChange={event => setForm({...form, sku: event.target.value})} placeholder="Scan or enter barcode" className={inputClass} />
+                            </div>
                         </div>
 
-                        {/* Selling Mode selection - unsaon pag-baligya ang produkto */}
-                        <div style={{ marginBottom: 20 }}>
+                        <div className="product-form-section product-selling-mode-section">
                             {label('Selling Mode *', 'How do you sell this product?')}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                {sellingModes.map(m => (
-                                    <button key={m.value} onClick={() => setForm({...form, selling_mode: m.value})} style={{
-                                        padding: '12px 16px', borderRadius: 10, cursor: 'pointer',
-                                        textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2,
-                                        border: form.selling_mode === m.value ? '2px solid #e8a236' : '1px solid #2e2820',
-                                        background: form.selling_mode === m.value ? 'rgba(232,162,54,.08)' : '#221e19',
-                                    }}>
-                                        <span style={{ color: '#f0e8d8', fontSize: 13, fontWeight: 600 }}>{m.label}</span>
-                                        <span style={{ color: '#7a6e60', fontSize: 11 }}>{m.desc}</span>
+                            <div className="product-selling-modes">
+                                {sellingModes.map(mode => (
+                                    <button key={mode.value} type="button" onClick={() => setForm({...form, selling_mode: mode.value})} className={form.selling_mode === mode.value ? 'active' : ''}>
+                                        <span>{mode.label}</span>
+                                        <small>{mode.desc}</small>
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Cost Price input - ang presyo nga gibayran sa produkto */}
-                        <div style={{ marginBottom: 14 }}>
-                            {label('Cost Price (₱) *', 'How much you paid for this batch')}
-                            <input type="number" min="0" step="0.01"
-                                value={form.cost_price}
-                                onChange={e => setForm({...form, cost_price: e.target.value})}
-                                placeholder="0.00" style={inp} />
-                        </div>
-
-                        {/* Pack Price input - presyo sa pack */}
-                        {(form.selling_mode === 'pack' || form.selling_mode === 'both') && (
-                            <div style={{ marginBottom: 14 }}>
-                                {label('Pack Price (₱) *', 'Selling price for whole pack')}
-                                <input type="number" min="0" step="0.01"
-                                    value={form.unit_price}
-                                    onChange={e => setForm({...form, unit_price: e.target.value})}
-                                    placeholder="0.00" style={inp} />
+                        <div className="product-form-grid">
+                            <div className="product-form-section">
+                                {label('Cost Price (₱) *', 'How much you paid for this batch')}
+                                <input type="number" min="0" step="0.01" value={form.cost_price} onChange={event => setForm({...form, cost_price: event.target.value})} placeholder="0.00" className={inputClass} />
                             </div>
-                        )}
 
-                        {/* Tingi Price input - presyo sa tingi */}
-                        {(form.selling_mode === 'tingi' || form.selling_mode === 'both') && (
-                            <div style={{ marginBottom: 14 }}>
-                                {label('Tingi Price (₱) *', 'Selling price per piece')}
-                                <input type="number" min="0" step="0.01"
-                                    value={form.tingi_price}
-                                    onChange={e => setForm({...form, tingi_price: e.target.value})}
-                                    placeholder="0.00" style={inp} />
-                            </div>
-                        )}
+                            {(form.selling_mode === 'pack' || form.selling_mode === 'both') && (
+                                <div className="product-form-section">
+                                    {label('Pack Price (₱) *', 'Selling price for whole pack')}
+                                    <input type="number" min="0" step="0.01" value={form.unit_price} onChange={event => setForm({...form, unit_price: event.target.value})} placeholder="0.00" className={inputClass} />
+                                </div>
+                            )}
 
-                        {/* Pieces per pack input - pila ka pieces sa pack */}
-                        {form.selling_mode === 'both' && (
-                            <div style={{ marginBottom: 14 }}>
-                                {label('Pieces per Pack', 'How many pieces in one pack')}
-                                <input type="number" min="1"
-                                    value={form.pieces_per_pack}
-                                    onChange={e => setForm({...form, pieces_per_pack: e.target.value})}
-                                    placeholder="1" style={inp} />
-                            </div>
-                        )}
+                            {(form.selling_mode === 'tingi' || form.selling_mode === 'both') && (
+                                <div className="product-form-section">
+                                    {label('Tingi Price (₱) *', 'Selling price per piece')}
+                                    <input type="number" min="0" step="0.01" value={form.tingi_price} onChange={event => setForm({...form, tingi_price: event.target.value})} placeholder="0.00" className={inputClass} />
+                                </div>
+                            )}
 
-                        {/* Stock and Threshold inputs - ang stock quantity ug threshold */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-                            <div>
+                            {form.selling_mode === 'both' && (
+                                <div className="product-form-section">
+                                    {label('Pieces per Pack', 'How many pieces in one pack')}
+                                    <input type="number" min="1" value={form.pieces_per_pack} onChange={event => setForm({...form, pieces_per_pack: event.target.value})} placeholder="1" className={inputClass} />
+                                </div>
+                            )}
+
+                            <div className="product-form-section">
                                 {label('Stock Quantity *')}
-                                <input type="number" min="0"
-                                    value={form.stock_quantity}
-                                    onChange={e => setForm({...form, stock_quantity: e.target.value})}
-                                    placeholder="0" style={inp} />
+                                <input type="number" min="0" value={form.stock_quantity} onChange={event => setForm({...form, stock_quantity: event.target.value})} placeholder="0" className={inputClass} />
                             </div>
-                            <div>
+
+                            <div className="product-form-section">
                                 {label('Restock Threshold')}
-                                <input type="number" min="0"
-                                    value={form.restock_threshold}
-                                    onChange={e => setForm({...form, restock_threshold: e.target.value})}
-                                    placeholder="10" style={inp} />
+                                <input type="number" min="0" value={form.restock_threshold} onChange={event => setForm({...form, restock_threshold: event.target.value})} placeholder="10" className={inputClass} />
+                            </div>
+
+                            <div className="product-form-section">
+                                {label('Unit')}
+                                <input type="text" value={form.unit} onChange={event => setForm({...form, unit: event.target.value})} placeholder="pcs, sachet, box..." className={inputClass} />
+                            </div>
+
+                            <div className="product-form-section">
+                                {label('Category')}
+                                <select value={form.category_id} onChange={event => setForm({...form, category_id: event.target.value})} className={inputClass}>
+                                    <option value="">Select category...</option>
+                                    {categories.map(category => <option key={category.id} value={category.id}>{category.emoji} {category.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div className="product-form-section">
+                                {label('Supplier')}
+                                <select value={form.supplier_id} onChange={event => setForm({...form, supplier_id: event.target.value})} className={inputClass}>
+                                    <option value="">Select supplier...</option>
+                                    {suppliers.map(supplier => <option key={supplier.id} value={supplier.id}>{supplier.name}</option>)}
+                                </select>
                             </div>
                         </div>
 
-                        {/* Unit input - ang unit sa produkto */}
-                        <div style={{ marginBottom: 14 }}>
-                            {label('Unit')}
-                            <input type="text"
-                                value={form.unit}
-                                onChange={e => setForm({...form, unit: e.target.value})}
-                                placeholder="pcs, sachet, box..." style={inp} />
-                        </div>
+                        {form.cost_price > 0 && (
+                            <div className="product-price-helper">
+                                <div className="product-price-helper-title">💡 Price Suggestion Tool</div>
+                                <label>Markup % — {form.markup ?? 30}%</label>
+                                <input type="range" min="5" max="200" step="5" value={form.markup ?? 30} onChange={event => setForm({...form, markup: parseInt(event.target.value)})} />
 
-                        {/* Category select - ang category sa produkto */}
-                        <div style={{ marginBottom: 14 }}>
-                            {label('Category')}
-                            <select value={form.category_id}
-                                onChange={e => setForm({...form, category_id: e.target.value})}
-                                style={inp}>
-                                <option value="">Select category...</option>
-                                {categories.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
-                            </select>
-                        </div>
+                                <div className="product-price-suggestions">
+                                    {(form.selling_mode === 'pack' || form.selling_mode === 'both') && (
+                                        <div>
+                                            <span>Suggested Pack Price:</span>
+                                            <strong>₱{(parseFloat(form.cost_price || 0) * (1 + (form.markup ?? 30) / 100)).toFixed(2)}</strong>
+                                            <button type="button" onClick={() => setForm({ ...form, unit_price: (parseFloat(form.cost_price || 0) * (1 + (form.markup ?? 30) / 100)).toFixed(2) })}>Apply</button>
+                                        </div>
+                                    )}
 
-                        {/* Supplier select - ang supplier sa produkto */}
-                        <div style={{ marginBottom: 24 }}>
-                            {label('Supplier')}
-                            <select value={form.supplier_id}
-                                onChange={e => setForm({...form, supplier_id: e.target.value})}
-                                style={inp}>
-                                <option value="">Select supplier...</option>
-                                {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                            </select>
-                        </div>
-                        {/* ── PRICE SUGGESTION TOOL ── */}
-        {form.cost_price > 0 && (
-            <div style={{
-                marginBottom: 24, padding: 16, borderRadius: 12,
-                background: 'rgba(232,162,54,.06)', border: '1px solid rgba(232,162,54,.2)'
-            }}>
-                <div style={{ color: '#e8a236', fontSize: 13, fontWeight: 700, marginBottom: 12 }}>
-                    💡 Price Suggestion Tool
-                </div>
-
-                {/* Markup slider */}
-                <div style={{ marginBottom: 12 }}>
-                    <label style={{ color: '#7a6e60', fontSize: 11, display: 'block', marginBottom: 6 }}>
-                        Markup % — {form.markup ?? 30}%
-                    </label>
-                    <input
-                        type="range" min="5" max="200" step="5"
-                        value={form.markup ?? 30}
-                        onChange={e => setForm({...form, markup: parseInt(e.target.value)})}
-                        style={{ width: '100%', accentColor: '#e8a236' }}
-                    />
-                </div>
-
-                {/* Suggestions based on selling mode */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {/* Pack suggestion — show if pack or both */}
-                    {(form.selling_mode === 'pack' || form.selling_mode === 'both') && (
-                        <div style={{
-                            padding: '10px 14px', borderRadius: 8,
-                            background: 'rgba(232,162,54,.08)', border: '1px solid rgba(232,162,54,.15)',
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                        }}>
-                            <span style={{ color: '#7a6e60', fontSize: 12 }}>
-                                Suggested Pack Price:
-                            </span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ color: '#e8a236', fontSize: 14, fontWeight: 700 }}>
-                                    ₱{(parseFloat(form.cost_price || 0) * (1 + (form.markup ?? 30) / 100)).toFixed(2)}
-                                </span>
-                                <button onClick={() => setForm({
-                                    ...form,
-                                    unit_price: (parseFloat(form.cost_price || 0) * (1 + (form.markup ?? 30) / 100)).toFixed(2)
-                                })} style={{
-                                    padding: '4px 10px', borderRadius: 6, border: 'none',
-                                    background: '#e8a236', color: '#fff',
-                                    fontSize: 11, fontWeight: 600, cursor: 'pointer'
-                                }}>Apply</button>
+                                    {(form.selling_mode === 'tingi' || form.selling_mode === 'both') && form.stock_quantity > 0 && (
+                                        <div>
+                                            <span>Suggested Tingi Price:</span>
+                                            <strong>₱{(parseFloat(form.cost_price || 0) / parseFloat(form.stock_quantity || 1) * (1 + (form.markup ?? 30) / 100)).toFixed(2)}</strong>
+                                            <button type="button" onClick={() => setForm({ ...form, tingi_price: (parseFloat(form.cost_price || 0) / parseFloat(form.stock_quantity || 1) * (1 + (form.markup ?? 30) / 100)).toFixed(2) })}>Apply</button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Tingi suggestion — show if tingi or both */}
-                    {(form.selling_mode === 'tingi' || form.selling_mode === 'both') && form.stock_quantity > 0 && (
-                        <div style={{
-                            padding: '10px 14px', borderRadius: 8,
-                            background: 'rgba(90,173,127,.08)', border: '1px solid rgba(90,173,127,.15)',
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                        }}>
-                            <span style={{ color: '#7a6e60', fontSize: 12 }}>
-                                Suggested Tingi Price: <span style={{ color: '#4a4238' }}>
-                                    (cost ÷ {form.stock_quantity} pcs × markup)
-                                </span>
-                            </span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ color: '#5aad7f', fontSize: 14, fontWeight: 700 }}>
-                                    ₱{(parseFloat(form.cost_price || 0) / parseFloat(form.stock_quantity || 1) * (1 + (form.markup ?? 30) / 100)).toFixed(2)}
-                                </span>
-                                <button onClick={() => setForm({
-                                    ...form,
-                                    tingi_price: (parseFloat(form.cost_price || 0) / parseFloat(form.stock_quantity || 1) * (1 + (form.markup ?? 30) / 100)).toFixed(2)
-                                })} style={{
-                                    padding: '4px 10px', borderRadius: 6, border: 'none',
-                                    background: '#5aad7f', color: '#fff',
-                                    fontSize: 11, fontWeight: 600, cursor: 'pointer'
-                                }}>Apply</button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        )}
-
-                        {/* Modal Actions - ang buttons sa modal */}
-                        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                            <button onClick={() => setShowModal(false)} style={{
-                                padding: '10px 20px', borderRadius: 8, border: '1px solid #2e2820',
-                                background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                            }}>Cancel</button>
-                            <button onClick={save} style={{
-                                padding: '10px 24px', borderRadius: 8, border: 'none',
-                                background: 'linear-gradient(135deg, #e8a236, #c45c2a)',
-                                color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer'
-                            }}>💾 Save Product</button>
+                        <div className="product-modal-actions">
+                            <button type="button" onClick={() => setShowModal(false)} className="product-secondary-button">Cancel</button>
+                            <button type="button" onClick={save} className="product-primary-button">💾 Save Product</button>
                         </div>
                     </div>
                 </div>

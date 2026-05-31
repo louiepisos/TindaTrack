@@ -52,15 +52,15 @@ export default function UtangPage() {
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#0f0d0a', fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="app-page utang-page" style={{ minHeight: '100vh', background: '#0f0d0a', fontFamily: "'DM Sans', sans-serif" }}>
 
             {/* ── TOP NAVIGATION ── */}
-            <div style={{
+            <div className="app-topbar" style={{
                 background: '#1a1612', borderBottom: '1px solid #2e2820',
                 padding: '0 32px', height: 64,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="app-brand" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontSize: 24 }}>🏪</span>
                     <span style={{
                         fontSize: 20, fontWeight: 800,
@@ -69,36 +69,36 @@ export default function UtangPage() {
                         backgroundClip: 'text'
                     }}>TindaTrack</span>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div className="app-nav" style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => router.get('/dashboard')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>📊 Dashboard</button>
+                    }}>📊 <span>Dashboard</span></button>
                     <button onClick={() => router.get('/products')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>📦 Products</button>
+                    }}>📦 <span>Products</span></button>
                     <button onClick={() => router.get('/sales')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>🧾 Sales</button>
+                    }}>🧾 <span>Sales</span></button>
                     <button onClick={() => router.post('/logout')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>Logout</button>
+                    }}>↩ <span>Logout</span></button>
                 </div>
             </div>
 
-            <div style={{ padding: 32 }}>
+            <div className="app-main" style={{ padding: 32 }}>
 
                 {/* ── PAGE HEADER ── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+                <div className="responsive-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
                     <div>
                         <h1 style={{ color: '#f0e8d8', fontSize: 26, fontWeight: 800, margin: '0 0 4px' }}>📋 Utang</h1>
                         <p style={{ color: '#7a6e60', margin: 0, fontSize: 14 }}>Track customer credits and payments</p>
                     </div>
                     {/* Total unpaid summary - important KPI */}
-                    <div style={{
+                    <div className="utang-total-card" style={{
                         background: '#3d1a1a', border: '1px solid rgba(217,83,79,.3)',
                         borderRadius: 14, padding: '14px 24px', textAlign: 'right'
                     }}>
@@ -108,12 +108,12 @@ export default function UtangPage() {
                 </div>
 
                 {/* ── FILTERS ── */}
-                <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+                <div className="responsive-filter-bar" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="🔍  Search customer name..."
-                        style={{ ...inp, maxWidth: 280 }}
+                        className="responsive-filter-input" style={{ ...inp, maxWidth: 280 }}
                     />
                     {['all', 'unpaid', 'partial', 'paid'].map(s => (
                         <button key={s} onClick={() => setFilterStatus(s)} style={{
@@ -127,7 +127,7 @@ export default function UtangPage() {
                 </div>
 
                 {/* ── UTANG LIST ── */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="responsive-record-list" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     {filtered.length === 0 && (
                         <div style={{
                             background: '#1a1612', border: '1px solid #2e2820',
@@ -142,12 +142,12 @@ export default function UtangPage() {
                         // Calculate payment percentage for progress bar
                         const pct = (parseFloat(u.paid_amount) / parseFloat(u.total_amount)) * 100
                         return (
-                            <div key={u.id} style={{
+                            <div key={u.id} className="responsive-record-card utang-record-card" style={{
                                 background: '#1a1612', border: '1px solid #2e2820',
                                 borderRadius: 16, padding: 24,
                                 transition: 'border-color .2s'
                             }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                                <div className="utang-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                                     {/* Customer Info */}
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
@@ -198,11 +198,11 @@ export default function UtangPage() {
                                 </div>
 
                                 {/* Items Purchased */}
-                                <div style={{
+                                <div className="utang-items-list" style={{
                                     background: '#221e19', borderRadius: 10, padding: 12, marginBottom: 16
                                 }}>
                                     {u.items.map((item, i) => (
-                                        <div key={i} style={{
+                                        <div key={i} className="utang-item-row" style={{
                                             display: 'flex', justifyContent: 'space-between',
                                             padding: '5px 0',
                                             borderBottom: i < u.items.length - 1 ? '1px solid #2e2820' : 'none'
@@ -236,11 +236,11 @@ export default function UtangPage() {
             {/* ── PAYMENT MODAL ── */}
             {/* ══════════════════════════════════════════ */}
             {payModal && (
-                <div style={{
+                <div className="payment-modal-backdrop" style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200
                 }}>
-                    <div style={{
+                    <div className="payment-modal-card" style={{
                         background: '#1a1612', border: '1px solid #3a3228',
                         borderRadius: 20, width: 400, padding: 32,
                         boxShadow: '0 40px 80px rgba(0,0,0,.6)'

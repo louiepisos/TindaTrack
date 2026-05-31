@@ -23,15 +23,15 @@ export default function SalesHistory() {
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#0f0d0a', fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="app-page sales-page" style={{ minHeight: '100vh', background: '#0f0d0a', fontFamily: "'DM Sans', sans-serif" }}>
 
             {/* Topbar */}
-            <div style={{
+            <div className="app-topbar" style={{
                 background: '#1a1612', borderBottom: '1px solid #2e2820',
                 padding: '0 32px', height: 64,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="app-brand" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontSize: 24 }}>🏪</span>
                     <span style={{
                         fontSize: 20, fontWeight: 800,
@@ -40,27 +40,27 @@ export default function SalesHistory() {
                         backgroundClip: 'text'
                     }}>TindaTrack</span>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div className="app-nav" style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => router.get('/dashboard')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>📊 Dashboard</button>
+                    }}>📊 <span>Dashboard</span></button>
                     <button onClick={() => router.get('/products')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>📦 Products</button>
+                    }}>📦 <span>Products</span></button>
                     <button onClick={() => router.get('/utang')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>📋 Utang</button>
+                    }}>📋 <span>Utang</span></button>
                     <button onClick={() => router.post('/logout')} style={{
                         padding: '8px 16px', borderRadius: 8, border: '1px solid #2e2820',
                         background: 'transparent', color: '#7a6e60', cursor: 'pointer', fontSize: 13
-                    }}>Logout</button>
+                    }}>↩ <span>Logout</span></button>
                 </div>
             </div>
 
-            <div style={{ padding: 32 }}>
+            <div className="app-main" style={{ padding: 32 }}>
 
                 {/* Header */}
                 <div style={{ marginBottom: 28 }}>
@@ -73,14 +73,14 @@ export default function SalesHistory() {
                 </div>
 
                 {/* Summary Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+                <div className="responsive-summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
                     {[
                         { label: 'Total Sales',    value: summary.totalSales,   icon: '🧾', color: '#e8a236', prefix: '' },
                         { label: 'Total Revenue',  value: summary.totalRevenue, icon: '💰', color: '#5aad7f', prefix: '₱' },
                         { label: "Today's Revenue",value: summary.todayRevenue, icon: '📈', color: '#4a90c4', prefix: '₱' },
                         { label: 'Utang Amount',   value: summary.totalUtang,   icon: '📋', color: '#d9534f', prefix: '₱' },
                     ].map(c => (
-                        <div key={c.label} style={{
+                        <div key={c.label} className="summary-card" style={{
                             background: '#1a1612', border: '1px solid #2e2820',
                             borderRadius: 16, padding: 24
                         }}>
@@ -98,12 +98,12 @@ export default function SalesHistory() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+                <div className="responsive-filter-bar" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
                     <input
                       value={search}
                       onChange={e => setSearch(e.target.value)}
                       placeholder="🔍  Search by Sale ID..."
-                      style={{ ...inp, flex: 1, minWidth: 240 }}
+                      className="responsive-filter-input" style={{ ...inp, flex: 1, minWidth: 240 }}
                     />
                     {['all', 'paid', 'utang'].map(f => (
                         <button key={f} onClick={() => setFilter(f)} style={{
@@ -119,7 +119,7 @@ export default function SalesHistory() {
                 </div>
 
                 {/* Sales List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div className="responsive-record-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {filtered.length === 0 && (
                         <div style={{
                             background: '#1a1612', border: '1px solid #2e2820',
@@ -130,7 +130,7 @@ export default function SalesHistory() {
                     )}
 
                     {filtered.map(sale => (
-                        <div key={sale.id} style={{
+                        <div key={sale.id} className="responsive-record-card sales-record-card" style={{
                             background: '#1a1612', border: '1px solid #2e2820',
                             borderRadius: 14, overflow: 'hidden',
                             transition: 'border-color .2s'
@@ -138,6 +138,7 @@ export default function SalesHistory() {
                             {/* Sale Row */}
                             <div
                                 onClick={() => setExpanded(expanded === sale.id ? null : sale.id)}
+                                className="sales-row-toggle"
                                 style={{
                                     padding: '16px 24px', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center',
@@ -145,7 +146,7 @@ export default function SalesHistory() {
                                 }}
                             >
                                 {/* Left: ID + Time */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                                <div className="sales-row-left" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                                     <div style={{
                                         width: 40, height: 40, borderRadius: 10,
                                         background: sale.payment_type === 'paid'
@@ -171,7 +172,7 @@ export default function SalesHistory() {
                                 </div>
 
                                 {/* Right: Amount + Badge */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div className="sales-row-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                     <span style={{
                                         padding: '3px 10px', borderRadius: 20,
                                         fontSize: 11, fontWeight: 600,
@@ -201,7 +202,7 @@ export default function SalesHistory() {
 
                             {/* Expanded Items */}
                             {expanded === sale.id && (
-                                <div style={{
+                                <div className="sales-expanded-panel" style={{
                                     borderTop: '1px solid #2e2820',
                                     padding: '14px 24px', background: '#161310'
                                 }}>
