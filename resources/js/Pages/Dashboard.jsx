@@ -220,7 +220,7 @@ export default function Dashboard() {
                             Dashboard 📊
                         </h1>
                         <p style={{ color: '#7a6e60', margin: 0, fontSize: 13 }}>
-                            Welcome, {auth?.user?.name}!
+                            Welcome,
                         </p>
                     </div>
                     <button onClick={() => setShowPOS(true)} style={{
