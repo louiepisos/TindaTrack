@@ -32,7 +32,7 @@ class UtangItem extends Model
     // An utang item belongs to a product
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     // An utang item belongs to an utang record

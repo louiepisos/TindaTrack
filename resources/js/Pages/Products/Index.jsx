@@ -120,7 +120,7 @@ export default function Products() {
         { value: 'both',  label: '🔀 Both',            desc: 'Can sell by piece or by pack (e.g. Milo sachet)' },
     ]
 
-    // Main JSX return - ang display sa produkto page
+    // Main JSX return - ang display sa product page
     return (
         // Main container - ang sulod sa tibuok page
         <div style={{ minHeight: '100vh', background: '#0f0d0a', fontFamily: "'DM Sans', sans-serif" }}>

@@ -30,8 +30,8 @@ class UtangController extends Controller
                 'status'         => $u->status,            // unpaid, partial, or paid
                 'created_at'     => $u->created_at->format('M d, Y g:i A'),
                 'items'          => $u->items->map(fn($i) => [
-                    'product' => $i->product->name,
-                    'emoji'   => $i->product->emoji,
+                    'product' => $i->product?->name ?? 'Deleted Product',
+                    'emoji'   => $i->product?->emoji ?? '❓',
                     'qty'     => $i->quantity,
                     'is_tingi'=> $i->is_tingi,             // Per piece or per pack?
                     'price'   => $i->unit_price,
