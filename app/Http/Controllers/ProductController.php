@@ -15,6 +15,31 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+
+    private function productPayload(Product $p): array
+    {
+        return [
+            'id'              => $p->id,
+            'name'            => $p->name,
+            'sku'             => $p->sku,
+            'emoji'           => $p->emoji,
+            'category'        => optional($p->category)->name,
+            'category_id'     => $p->category_id,
+            'supplier'        => optional($p->supplier)->name,
+            'supplier_id'     => $p->supplier_id,
+            'cost_price'      => $p->cost_price,
+            'unit_price'      => $p->unit_price,
+            'tingi_price'     => $p->tingi_price,
+            'pieces_per_pack' => $p->pieces_per_pack,
+            'stock'           => $p->stock_quantity,
+            'stock_quantity'  => $p->stock_quantity,
+            'threshold'       => $p->restock_threshold,
+            'restock_threshold' => $p->restock_threshold,
+            'unit'            => $p->unit,
+            'status'          => $p->status,
+        ];
+    }
+
     // Ga pakita sa tanan active products sa table para sa frontend
     public function index()
     {
@@ -24,30 +49,32 @@ class ProductController extends Controller
             ->latest()  // Sort by most recent first
             ->get()
             // I-transform ang bawat product para sa display sa frontend
-            ->map(fn($p) => [
-                'id'              => $p->id,
-                'name'            => $p->name,
-                'sku'             => $p->sku,
-                'emoji'           => $p->emoji,
-                'category'        => optional($p->category)->name,
-                'category_id'     => $p->category_id,
-                'supplier'        => optional($p->supplier)->name,
-                'supplier_id'     => $p->supplier_id,
-                'cost_price'      => $p->cost_price,   // Buying price from supplier
-                'unit_price'      => $p->unit_price,   // Selling price per pack
-                'tingi_price'     => $p->tingi_price,  // Price per individual piece
-                'pieces_per_pack' => $p->pieces_per_pack,
-                'stock'           => $p->stock_quantity,
-                'threshold'       => $p->restock_threshold,
-                'unit'            => $p->unit,
-                'status'          => $p->status,
-            ]);
+            ->map(fn($p) => $this->productPayload($p));
 
         // Render ang products page with data
         return Inertia::render('Products/Index', [
             'products'   => $products,
             'categories' => Category::where('is_active', true)->get(['id', 'name', 'emoji']),
             'suppliers'  => Supplier::where('is_active', true)->get(['id', 'name']),
+        ]);
+    }
+
+
+    public function lookupByBarcode(string $barcode)
+    {
+        $product = Product::with(['category', 'supplier'])
+            ->where('is_active', true)
+            ->where('sku', $barcode)
+            ->first();
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'No product found for barcode ' . $barcode,
+            ], 404);
+        }
+
+        return response()->json([
+            'product' => $this->productPayload($product),
         ]);
     }
 
