@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     // ── PRODUCTS ROUTES ──
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');   // Add product
+    Route::get('/products/barcode/{barcode}', [ProductController::class, 'lookupByBarcode'])->name('products.barcode'); // Barcode lookup
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');   // Edit product
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy'); // Delete product
 

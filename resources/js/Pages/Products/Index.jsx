@@ -1,6 +1,7 @@
 // Product management page - organized, searchable, and responsive inventory UI
 import { useMemo, useState } from 'react'
 import { router, usePage } from '@inertiajs/react'
+import BarcodeScanner from '../../Components/BarcodeScanner'
 
 export default function Products() {
     const { products, categories, suppliers } = usePage().props
@@ -9,6 +10,9 @@ export default function Products() {
     const [search, setSearch] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('all')
     const [stockFilter, setStockFilter] = useState('all')
+    const [scannerOpen, setScannerOpen] = useState(false)
+    const [scannerMode, setScannerMode] = useState('lookup')
+    const [scanNotice, setScanNotice] = useState(null)
     const [form, setForm] = useState({
         name: '', sku: '', emoji: '📦',
         category_id: '', supplier_id: '',
@@ -84,10 +88,51 @@ export default function Products() {
         low: products.filter(product => product.status === 'low').length,
     }), [products])
 
+
+    const showScanNotice = (type, message) => {
+        setScanNotice({ type, message })
+        window.setTimeout(() => setScanNotice(null), 4500)
+    }
+
+    const openLookupScanner = () => {
+        setScannerMode('lookup')
+        setScannerOpen(true)
+    }
+
+    const openSkuScanner = () => {
+        setScannerMode('sku')
+        setScannerOpen(true)
+    }
+
+    const handleBarcodeScanned = (barcode) => {
+        setScannerOpen(false)
+
+        if (scannerMode === 'sku') {
+            setForm(current => ({ ...current, sku: barcode }))
+            showScanNotice('success', `Barcode ${barcode} added to the product form.`)
+            return
+        }
+
+        const product = products.find(item => String(item.sku || '').trim() === barcode)
+        setSearch(barcode)
+        setStockFilter('all')
+
+        if (!product) {
+            setSelectedCategory('all')
+            showScanNotice('error', `No product found for barcode ${barcode}.`)
+            return
+        }
+
+        setSelectedCategory(product.category_id ? String(product.category_id) : 'uncategorized')
+        openEdit(product)
+        showScanNotice('success', `Found ${product.name}. Product details are ready to review or update.`)
+    }
+
     const resetFilters = () => {
         setSearch('')
         setSelectedCategory('all')
         setStockFilter('all')
+        setScanNotice(null)
     }
 
     const openAdd = () => {
@@ -233,8 +278,15 @@ export default function Products() {
                         <h1>📦 Products</h1>
                         <p>{products.length} products in catalog · {categories.length} active categories</p>
                     </div>
-                    <button type="button" onClick={openAdd} className="product-primary-button">＋ Add Product</button>
+                    <div className="products-hero-actions">
+                        <button type="button" onClick={openLookupScanner} className="product-secondary-button product-scan-button">📷 Scan Barcode</button>
+                        <button type="button" onClick={openAdd} className="product-primary-button">＋ Add Product</button>
+                    </div>
                 </section>
+
+                {scanNotice && (
+                    <div className={`barcode-notice barcode-notice--${scanNotice.type}`}>{scanNotice.message}</div>
+                )}
 
                 <section className="products-toolbar" aria-label="Product search and filters">
                     <div className="products-search-wrap">
@@ -267,7 +319,10 @@ export default function Products() {
                         </div>
                     </div>
 
-                    <button type="button" onClick={resetFilters} className="product-secondary-button">Reset</button>
+                    <div className="products-toolbar-actions">
+                        <button type="button" onClick={openLookupScanner} className="product-secondary-button product-scan-button">📷 Scan</button>
+                        <button type="button" onClick={resetFilters} className="product-secondary-button">Reset</button>
+                    </div>
                 </section>
 
                 <section className="products-category-tabs" aria-label="Quick category filters">
@@ -405,7 +460,10 @@ export default function Products() {
                             </div>
                             <div className="product-form-section">
                                 {label('SKU / Barcode')}
-                                <input type="text" value={form.sku} onChange={event => setForm({...form, sku: event.target.value})} placeholder="Scan or enter barcode" className={inputClass} />
+                                <div className="barcode-input-row">
+                                    <input type="text" value={form.sku} onChange={event => setForm({...form, sku: event.target.value})} placeholder="Scan or enter barcode" className={inputClass} />
+                                    <button type="button" onClick={openSkuScanner} className="product-secondary-button product-scan-button">📷 Scan</button>
+                                </div>
                             </div>
                         </div>
 
@@ -513,6 +571,13 @@ export default function Products() {
                     </div>
                 </div>
             )}
+            <BarcodeScanner
+                open={scannerOpen}
+                title={scannerMode === 'sku' ? 'Scan Product Barcode' : 'Find Product by Barcode'}
+                helper={scannerMode === 'sku' ? 'Align the barcode to fill the SKU/barcode field.' : 'Scan a product barcode to open its inventory details.'}
+                onClose={() => setScannerOpen(false)}
+                onDetected={handleBarcodeScanned}
+            />
         </div>
     )
 }

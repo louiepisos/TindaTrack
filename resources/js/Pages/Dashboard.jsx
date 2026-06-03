@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { router, usePage } from '@inertiajs/react'
+import BarcodeScanner from '../Components/BarcodeScanner'
 
 export default function Dashboard() {
     const { stats, recentProducts, auth } = usePage().props
@@ -16,6 +17,8 @@ export default function Dashboard() {
     const [processing, setProcessing] = useState(false)
     const [productSearch, setProductSearch] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('All')
+    const [scannerOpen, setScannerOpen] = useState(false)
+    const [scanNotice, setScanNotice] = useState(null)
 
     // Get unique categories
     const categories = useMemo(() => {
@@ -27,12 +30,58 @@ export default function Dashboard() {
     const filteredProducts = useMemo(() => {
         return recentProducts.filter(p => {
             const matchSearch = !productSearch ||
-                p.name.toLowerCase().includes(productSearch.toLowerCase())
+                p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                (p.sku || '').toLowerCase().includes(productSearch.toLowerCase())
             const matchCat = selectedCategory === 'All' ||
                 p.category?.name === selectedCategory
             return matchSearch && matchCat
         })
     }, [recentProducts, productSearch, selectedCategory])
+
+
+    const showScanNotice = (type, message) => {
+        setScanNotice({ type, message })
+        window.setTimeout(() => setScanNotice(null), 4500)
+    }
+
+    const fetchProductByBarcode = async (barcode) => {
+        const localProduct = recentProducts.find(product => String(product.sku || '').trim() === barcode)
+        if (localProduct) return localProduct
+
+        try {
+            const response = await fetch(`/products/barcode/${encodeURIComponent(barcode)}`, {
+                headers: { Accept: 'application/json' },
+            })
+
+            if (!response.ok) return null
+
+            const data = await response.json()
+            return data.product
+        } catch (error) {
+            return null
+        }
+    }
+
+    const handleSaleBarcodeScanned = async (barcode) => {
+        setScannerOpen(false)
+        const product = await fetchProductByBarcode(barcode)
+
+        if (!product) {
+            showScanNotice('error', `No product found for barcode ${barcode}.`)
+            setProductSearch(barcode)
+            return
+        }
+
+        if ((product.stock_quantity ?? product.stock ?? 0) <= 0) {
+            showScanNotice('error', `${product.name} is out of stock and was not added.`)
+            return
+        }
+
+        addToCart(product)
+        setProductSearch('')
+        setSelectedCategory('All')
+        showScanNotice('success', `${product.name} added to cart from barcode ${barcode}.`)
+    }
 
     // Cart total
     const total = cart.reduce((sum, i) => sum + i.total_price, 0)
@@ -115,6 +164,7 @@ export default function Dashboard() {
         setShowChange(false)
         setProductSearch('')
         setSelectedCategory('All')
+        setScanNotice(null)
     }
 
     const submitSale = () => {
@@ -347,8 +397,12 @@ export default function Dashboard() {
                             flex: 1, overflow: 'auto', padding: 12,
                             borderBottom: '1px solid #2e2820'
                         }}>
+                            {scanNotice && (
+                                <div className={`barcode-notice barcode-notice--${scanNotice.type}`}>{scanNotice.message}</div>
+                            )}
+
                             {/* Search + Category Filter */}
-                            <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                            <div className="pos-search-row" style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
                                 <input
                                     value={productSearch}
                                     onChange={e => setProductSearch(e.target.value)}
@@ -356,6 +410,7 @@ export default function Dashboard() {
                                     style={{ ...s.inp, flex: 1, minWidth: 150 }}
                                     autoFocus
                                 />
+                                <button type="button" onClick={() => setScannerOpen(true)} className="product-secondary-button product-scan-button">📷 Scan Barcode</button>
                             </div>
 
                             {/* Category Pills */}
@@ -658,6 +713,14 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+
+            <BarcodeScanner
+                open={scannerOpen}
+                title="Scan Product for Sale"
+                helper="Scan a product barcode to add it to the cart automatically."
+                onClose={() => setScannerOpen(false)}
+                onDetected={handleSaleBarcodeScanned}
+            />
 
             {/* ── CHANGE MODAL ── */}
             {showChange && (

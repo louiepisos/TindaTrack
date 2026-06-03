@@ -74,6 +74,7 @@ class DashboardController extends Controller
                 'id'              => $p->id,
                 'name'            => $p->name,
                 'emoji'           => $p->emoji,
+                'sku'             => $p->sku,
                 'unit_price'      => $p->unit_price,
                 'cost_price'      => $p->cost_price,
                 'tingi_price'     => $p->tingi_price,
@@ -81,6 +82,7 @@ class DashboardController extends Controller
                 'stock_quantity'  => $p->stock_quantity,
                 'restock_threshold' => $p->restock_threshold,
                 'category'        => $p->category,
+                'category_id'     => $p->category_id,
             ]);
 
         // Render ang dashboard page with all data
