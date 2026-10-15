@@ -84,7 +84,10 @@ class SupplierSeeder extends Seeder
         // Loop through each supplier og mag-create sa database
         foreach ($suppliers as $supplier) {
             // Merge array with is_active = true para sa tanan
-            Supplier::create(array_merge($supplier, ['is_active' => true]));
+            Supplier::updateOrCreate(
+                ['name' => $supplier['name']],
+                array_merge($supplier, ['is_active' => true])
+            );
         }
     }
 }

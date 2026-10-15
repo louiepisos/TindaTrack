@@ -36,14 +36,16 @@ class CategorySeeder extends Seeder
 
         // Loop through each category and mag-create sa database
         foreach ($categories as $cat) {
-            Category::create([
-                'name'        => $cat['name'],
-                'slug'        => Str::slug($cat['name']),      // URL-friendly version
-                'emoji'       => $cat['emoji'],
-                'color'       => $cat['color'],                // Para sa UI styling
-                'description' => $cat['description'],
-                'is_active'   => true,                         // Categories ay active by default
-            ]);
+            Category::updateOrCreate(
+                ['slug' => Str::slug($cat['name'])],
+                [
+                    'name'        => $cat['name'],
+                    'emoji'       => $cat['emoji'],
+                    'color'       => $cat['color'],
+                    'description' => $cat['description'],
+                    'is_active'   => true,
+                ]
+            );
         }
     }
 }

@@ -6,8 +6,15 @@ echo "🏪 Starting TindaTrack..."
 echo "⏳ Waiting for database..."
 sleep 5
 
+if [ ! -f .env ]; then
+    echo "[TindaTrack] Creating .env from .env.example"
+    cp .env.example .env
+fi
+
 # Generate app key if not set
-php artisan key:generate --no-interaction --force
+if ! grep -q '^APP_KEY=base64:' .env; then
+    php artisan key:generate --no-interaction --force
+fi
 
 # Run migrations
 echo "🗄️ Running migrations..."

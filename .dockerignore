@@ -1,0 +1,8 @@
+/.git
+/.env
+/node_modules
+/vendor
+/ngrok.exe
+/storage/logs/*
+/public/build
+compose-run.log

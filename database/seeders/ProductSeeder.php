@@ -272,7 +272,10 @@ class ProductSeeder extends Seeder
         // Loop through each product og mag-create sa database
         foreach ($products as $product) {
             // Merge array with is_active = true para sa tanan nga products
-            Product::create(array_merge($product, ['is_active' => true]));
+            Product::updateOrCreate(
+                ['sku' => $product['sku']],
+                array_merge($product, ['is_active' => true])
+            );
         }
     }
 }

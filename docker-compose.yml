@@ -21,7 +21,7 @@ services:
       - DB_PORT=5432
       - DB_DATABASE=tindatrack
       - DB_USERNAME=postgres
-      - DB_PASSWORD=tindatrack123
+      - DB_PASSWORD=126636110059
       - SESSION_DRIVER=database
       - CACHE_DRIVER=file
     depends_on:

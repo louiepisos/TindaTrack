@@ -15,18 +15,22 @@ class UserSeeder extends Seeder
     {
         // Create ang default store owner account
         // Email: admin@tindatrack.ph, Password: password
-        User::create([
-            'name'     => 'Louie Jay Pisos',  // Store owner name
-            'email'    => 'admin@tindatrack.ph',
-            'password' => Hash::make('password'),  // Hashed password
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@tindatrack.ph'],
+            [
+                'name'     => 'Louie Jay Pisos',
+                'password' => Hash::make('password'),
+            ]
+        );
 
         // Create demo/guest account para sa testing
         // Email: demo@tindatrack.ph, Password: password
-        User::create([
-            'name'     => 'Demo User',
-            'email'    => 'demo@tindatrack.ph',
-            'password' => Hash::make('password'),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'demo@tindatrack.ph'],
+            [
+                'name'     => 'Demo User',
+                'password' => Hash::make('password'),
+            ]
+        );
     }
 }
